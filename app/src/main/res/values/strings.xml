@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">GPS Map</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="start">Start</string>
+    <string name="save">Save</string>
+    <string name="view_data">View Data</string>
+    <string name="title_activity_view_data">ViewData</string>
+    <string name="resetFile">Delete File</string>
+    <string name="copy">Copy</string>
+    <string name="Settings">Settings</string>
+    <string name="share">Share</string>
+    <string name="lat">(optional) Lat:</string>
+    <string name="lng">(optional) Lng:</string>
+    <string name="interval">Update Interval:</string>
+    <string name="GetInterval_Instructions">"Enter the update interval in seconds and the true latitude and longitude (optional)"</string>string>
+    <string name="GPS">Use GPS without Criteria</string>
+    <string name="fusedLocation">Use Fused Location Services</string>
+    <string name="PressStart">Press START to begin</string>
+    <string name="Paused2">PAUSED - press again to write</string>
+    <string name="Paused">PAUSED</string>
+    <string name="running">RUNNING</string>
+    <string name="GPSCriteria">Use GPS with High Accuracy Criteria</string>
+</resources>
