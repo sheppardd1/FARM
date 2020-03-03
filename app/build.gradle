@@ -4,8 +4,8 @@ android {
     compileSdkVersion 21
     defaultConfig {
         applicationId "com.example.davea.mapping_gps"
-        minSdkVersion 15
-        targetSdkVersion 27
+        minSdkVersion 21
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"

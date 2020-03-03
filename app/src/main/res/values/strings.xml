@@ -6,8 +6,6 @@
     <string name="view_data">View Data</string>
     <string name="title_activity_view_data">ViewData</string>
     <string name="resetFile">Delete File</string>
-    <string name="copy">Copy</string>
-    <string name="Settings">Settings</string>
     <string name="share">Share</string>
     <string name="lat">(optional) Lat:</string>
     <string name="lng">(optional) Lng:</string>
