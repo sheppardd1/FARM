@@ -15,10 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
-/*import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;*/
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -33,7 +29,6 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -450,7 +445,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         //else if using GPS and permissions given
         else if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && !useFusedLocation){
-            lastLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+            try {
+                lastLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+            }catch (Exception e){
+                lastLocation = null;
+            }
         }
         else{   //else cannot get last location
             lastLocation = null;
