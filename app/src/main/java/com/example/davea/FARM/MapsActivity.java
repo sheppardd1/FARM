@@ -84,7 +84,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LinkedList<Float> distanceErrorList = new LinkedList<>();   //list of distance errors
     float averageAccuracy = -999;   //average of the accuracy readings from one session. Initialize to -999 so any errors are obvious
     float averageError = -999;      //average of the true error between given Lat Lng and GPS's Lat Lng
-    float distanceError[] = new float[3];   //values returned when function is called to determine distance between real location and GPS location reading
     //String:
     static String fileContents; //Stuff that will be written to the file. It is static so that it can be accessed in other activity
     String markerLabel = "X";  //label for the marker (accuracy and number of marker example: 3.0 #2)
@@ -451,6 +450,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     void addMarker(){   //adds marker to map with label of number, accuracy reading, and color corresponding to accuracy reading
+        //TODO: make this draw a polyline instead of adding individual markers
+        /*  Example Code:
+                Polyline polyline1 = googleMap.addPolyline(new PolylineOptions()
+                .clickable(true)
+                .add(
+                        new LatLng(-35.016, 143.321),
+                        new LatLng(-34.747, 145.592),
+                        new LatLng(-34.364, 147.891),
+                        new LatLng(-33.501, 150.217),
+                        new LatLng(-32.306, 149.248),
+                        new LatLng(-32.491, 147.309)));
+
+         */
         //set label for marker (accuracy and marker number)
         markerLabel = accuracyList.get(numPins) + " #" + (++numPins);
 
