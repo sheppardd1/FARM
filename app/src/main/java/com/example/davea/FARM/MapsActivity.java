@@ -75,8 +75,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //double and Double:
     double currentLongitude;    //current lng
     double currentLatitude;     //current lat
-    static Double trueLat = null;    //inputted correct latitude (see GetInterval Activity)
-    static Double trueLng = null;    //inputted correct longitude (see GetInterval Activity)
+
     //int:
     public int numPins = 0; //number of markers on map
     static int interval = 0;    //refresh rate of GPS
@@ -101,7 +100,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     static boolean usingCriteria;  //true if specifying high accuracy criteria for location
     static boolean useFusedLocation; //true if user selects radio button for Fused Location Services, false if selected GPS
     static boolean setInterval = false; //true if user has specified GPS refresh rate
-    static boolean setTrueLatLng = false;    //specifies if user inputs true values of lat and long
     //LatLng:
     LatLng currentPosition;
     //Toast:
@@ -179,15 +177,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         sum += accuracyList.get(i);
                     }
                     averageAccuracy = (float) (sum / ((float) numPins)); //compute average accuracy readings
-
-                    if (setTrueLatLng) {
-                        sum = 0.0;  //initialize sum to 0
-                        for (int i = 0; i < numPins; i++) { //get sum of all accuracy reading during the session
-                            sum += distanceErrorList.get(i);
-                        }
-                        averageError = (float) (sum / ((float) numPins)); //compute average error value
-                    }
-
 
                     TV.setText(""); //clear TextView
                     reset();    //reset data values and write to file
@@ -359,55 +348,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //print accuracy value on screen along with coordinates and time
             time = dateFormatDayAndTime.format(cal.getTime());
             fileContents += " Stop:  " + time + "\n------------------------------\n";
-            if (setTrueLatLng) {    //if user specified lat and lng
-                //tell what type of location services are being used
-                if(useFusedLocation){
-                    fileContents += "Using Fused Location Services\n";
-                }
-                else if (usingCriteria){
-                    fileContents += "Using GPS with High Accuracy Criteria\n";
-                }
-                else{
-                    fileContents += "Using GPS without Criteria\n";
-                }
-
-                //print user-specified lat lng if applicable
-                fileContents += "Lat: " + trueLat + "\n";
-                fileContents += "Lng: " + trueLng + "\n";
-
-                //print data headers
-                fileContents += "#  | Accuracy |  Error (m)  | Time\n";
-
-            } else{ //else user did not specify lat and lng
-                //tell what type of location services are being used
-                if(useFusedLocation){
-                    fileContents += "Using Fused Location Services\n";
-                }
-                else if (usingCriteria){
-                    fileContents += "Using GPS with High Accuracy Criteria\n";
-                }
-                else{
-                    fileContents += "Using GPS without Criteria\n";
-                }
-
-                fileContents += "#  | Accuracy | Time\n";
+            //tell what type of location services are being used
+            if(useFusedLocation){
+                fileContents += "Using Fused Location Services\n";
             }
+            else if (usingCriteria){
+                fileContents += "Using GPS with High Accuracy Criteria\n";
+            }
+            else{
+                fileContents += "Using GPS without Criteria\n";
+            }
+
+            fileContents += "#  | Accuracy | Time\n";
         }
 
         //set fileContents to number, accuracy value, and timestamp [example: "#1)  9.0"  ] with fancy formatting
         //fileContents += ("#" + (i + 1) + ") \t\t" +(accuracyList.get(i).toString() + " \t\t" + (String.format("%.2f", distanceErrorList.get(i))) + " \t\t" + timeList.get(i) + "\n"));
-        if (setTrueLatLng) {
-            fileContents += String.format("%-5s %s", ((i + 1) + ")"), String.format("%-10s %s", (accuracyList.get(i).toString()), String.format("%-11s %s", (String.format("%.2f", distanceErrorList.get(i))), (timeList.get(i) + "\n"))));
-            //note: distanceErrorList.get(i) will never be more than 11 chars since the earth's circumference is about 40 million meters (XXXXXXXX.XX), so formatting will never truncate digits
-        } else {
-            fileContents += String.format("%-7s %s", ("#" + (i + 1) + ")"), String.format("%-10s %s", (accuracyList.get(i).toString()), (timeList.get(i) + "\n")));
 
-        }
+        fileContents += String.format("%-7s %s", ("#" + (i + 1) + ")"), String.format("%-10s %s", (accuracyList.get(i).toString()), (timeList.get(i) + "\n")));
+
 
         if (i == numPins - 1) {  //end of data that must be written is reached
             fileContents += "\nAverage Accuracy Radius: " + String.format("%.2f", averageAccuracy) + "\n\n"; //write the average accuracy reading
-            if (setTrueLatLng)
-                fileContents += "Average True Error: " + String.format("%.2f", averageError) + "\n\n"; //write the average error value
             try {   //write file
                 outputStream.write(fileContents.getBytes());    //write fileContents into file
                 TV.setText(TV.getText() + "File Written");
@@ -558,12 +520,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     //get lat and long
                     currentLongitude = location.getLongitude();
                     currentLatitude = location.getLatitude();
-
-                    //if user inputted the true lat and long, then calculate distance between GPS's location and true coordinates
-                    if(setTrueLatLng) {
-                        Location.distanceBetween(trueLat, trueLng, currentLatitude, currentLongitude, distanceError);
-                        distanceErrorList.add(distanceError[0]);
-                    }
 
                     //set lat and long into LatLng type variable
                     currentPosition = new LatLng(currentLatitude, currentLongitude);
@@ -758,12 +714,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     //get lat and long
                     currentLongitude = currentLocationResult.getLastLocation().getLongitude();
                     currentLatitude = currentLocationResult.getLastLocation().getLatitude();
-
-                    //if user inputted the true lat and long, then calculate distance between GPS's location and true coordinates
-                    if(setTrueLatLng) {
-                        Location.distanceBetween(trueLat, trueLng, currentLatitude, currentLongitude, distanceError);
-                        distanceErrorList.add(distanceError[0]);
-                    }
 
                     //set lat and long into LatLng type variable
                     currentPosition = new LatLng(currentLatitude, currentLongitude);

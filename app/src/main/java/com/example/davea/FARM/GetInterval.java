@@ -26,8 +26,6 @@ public class GetInterval extends AppCompatActivity {
 
         //setup UI
         final EditText interval_input = findViewById(R.id.interval_input);
-        final EditText lat_input = findViewById(R.id.lat_input);
-        final EditText lng_input = findViewById(R.id.lng_input);
         Button done = findViewById(R.id.done);
         TextView TV = findViewById(R.id.instructions);
         locationChoiceRadioGroup = findViewById(R.id.LocationChoiceRadioGroup);
@@ -38,7 +36,6 @@ public class GetInterval extends AppCompatActivity {
         done.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean validValues; //only false if lat and lng values are both inputted and at least one is outside of acceptable range, else true
                 //note: using an unsigned EditText for interval, so don't have to worry about negative numbers there
                 if(interval_input.getText().toString().trim().length() > 0 && radioIsSet) {   //ensure interval_input is not empty and radio button is set
                     MapsActivity.interval = Integer.valueOf(interval_input.getText().toString()); //set interval to value specified in interval_input
@@ -47,39 +44,7 @@ public class GetInterval extends AppCompatActivity {
                     if (MapsActivity.locationListener != null) {    //if there is a location listener set up, remove it
                         MapsActivity.locationManager.removeUpdates(MapsActivity.locationListener);  //ensures we only have one location listener running at once. Don't want duplicate data.
                     }
-                    //if user has entered both a true lat and long value, set them
-                    //if entered only one or none, ignore it
-                    if(lat_input.getText().toString().trim().length() > 0 && lng_input.getText().toString().trim().length() > 0){
-                        if(Math.abs(Float.valueOf(lat_input.getText().toString())) > 90)
-                        {   //lat values must be between -90 and 90 inclusive
-                            if(myToast != null) myToast.cancel();
-                            myToast = Toast.makeText(getApplicationContext(), "Invalid Latitude Value", Toast.LENGTH_SHORT);
-                            myToast.show();
-                            validValues = false;
-                        }
-                        else if(Math.abs(Float.valueOf(lng_input.getText().toString())) > 180)
-                        {   //lng values must be between -180 and 180 inclusive
-                            if(myToast != null) myToast.cancel();
-                            myToast = Toast.makeText(getApplicationContext(), "Invalid Longitude Value", Toast.LENGTH_SHORT);
-                            myToast.show();
-                            validValues = false;
-                        }
-                        else {
-                            validValues = true;
-                            MapsActivity.setTrueLatLng = true;
-                            //set values in MapsActivity
-                            MapsActivity.trueLat = Double.valueOf(lat_input.getText().toString());
-                            MapsActivity.trueLng = Double.valueOf(lng_input.getText().toString());
-                        }
-                    }
-                    else {  //else did not specify both true lat and long
-                        MapsActivity.setTrueLatLng = false;
-                        validValues = true;
-                    }
-                    if(validValues) {
-                        //go back to main activity
-                        startActivity(new Intent(getApplicationContext(), MapsActivity.class));
-                    }
+                    startActivity(new Intent(getApplicationContext(), MapsActivity.class)); // go to mapping activity
                 }
                 else if(radioIsSet){ //if radio is set, then interval is not
                     if(myToast != null) myToast.cancel();
