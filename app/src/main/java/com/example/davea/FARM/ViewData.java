@@ -1,12 +1,10 @@
-package com.example.davea.mapping_gps;
+package com.example.davea.FARM;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Environment;
 /*import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;*/
 import android.os.Bundle;
@@ -18,10 +16,8 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 

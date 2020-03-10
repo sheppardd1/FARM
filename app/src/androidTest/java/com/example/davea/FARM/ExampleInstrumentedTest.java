@@ -1,4 +1,4 @@
-package com.example.davea.mapping_gps;
+package com.example.davea.FARM;
 
 import android.content.Context;
 //import android.support.test.InstrumentationRegistry;
@@ -25,6 +25,6 @@ public class ExampleInstrumentedTest {
         // TODO: use non-deprecated alternative
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.davea.mapping_gps", appContext.getPackageName());
+        assertEquals("com.example.davea.FARM", appContext.getPackageName());
     }
 }

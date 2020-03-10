@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.davea.mapping_gps">
+    package="com.example.davea.FARM">
 
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -33,7 +33,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name="com.example.davea.FARM.MapsActivity"
             android:label="@string/title_activity_maps"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -43,11 +43,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ViewData"
+            android:name="com.example.davea.FARM.ViewData"
             android:label="@string/title_activity_view_data"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".GetInterval"></activity>
+        <activity android:name="com.example.davea.FARM.GetInterval"></activity>
     </application>
 
 </manifest>
