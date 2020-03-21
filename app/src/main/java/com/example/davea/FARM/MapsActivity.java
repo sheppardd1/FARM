@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -33,10 +34,13 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.internal.IGoogleMapDelegate;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -68,7 +72,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     File dataFile;
 
     //UI:
-    Button start, save, viewData;  //self-explanatory buttons
+    Button startBtn, resetBtn, viewDataBtn;  //self-explanatory buttons
     TextView TV;    //only textview
 
     //variables:
@@ -77,16 +81,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     double currentLatitude;     //current lat
 
     //int:
-    public int numPins = 0; //number of markers on map
     static int interval = 0;    //refresh rate of GPS
     //float and Float:
-    LinkedList<Float> accuracyList = new LinkedList<>();   //list of accuracy readings
-    LinkedList<Float> distanceErrorList = new LinkedList<>();   //list of distance errors
     float averageAccuracy = -999;   //average of the accuracy readings from one session. Initialize to -999 so any errors are obvious
-    float averageError = -999;      //average of the true error between given Lat Lng and GPS's Lat Lng
     //String:
     static String fileContents; //Stuff that will be written to the file. It is static so that it can be accessed in other activity
-    String markerLabel = "X";  //label for the marker (accuracy and number of marker example: 3.0 #2)
     String time;    //the time in the dateFormatDayAndTime format (defined later). Used for giving start and end times of each session
     LinkedList<String> timeList = new LinkedList<>(); //List of all the times that the datapoints were taken
     //boolean:
@@ -100,7 +99,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     static boolean useFusedLocation; //true if user selects radio button for Fused Location Services, false if selected GPS
     static boolean setInterval = false; //true if user has specified GPS refresh rate
     //LatLng:
-    LatLng currentPosition;
+    //LatLng currentPosition;
+    LinkedList<LatLng> positionList = new LinkedList<>();
+    //Polyline
+    Polyline pathPolyline;
     //Toast:
     Toast myToast = null;
 
@@ -137,7 +139,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             myToast.show();
         }
 
-        start.setOnClickListener(new View.OnClickListener() {
+        startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 on = !on;   //invert on. Toggles between start and paused
@@ -149,36 +151,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (wasReset) { //set wasReset to false
                         wasReset = false;
                     }
+                    gMap.animateCamera(CameraUpdateFactory.zoomTo(18f));
                 } else {
                     TV.setText(R.string.Paused);    //if not on after pressing start, session must be paused
                 }
             }
         });
 
-        save.setOnClickListener(new View.OnClickListener() {
+        resetBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (on) {
-                    on = false; //paused if currently on
-
-                    if (numPins > 0) { //if data has been recorded
-                        TV.setText(R.string.Paused2);
-                        paused = true;
-                    } else {   //if there is no data thus far
-                        TV.setText(R.string.PressStart);
-                        paused = false;
-                    }
-
-                } else if (numPins != 0) {      //if data has been collected but was not on
-                    paused = false;
-                    double sum = 0.0;  //initialize sum to 0
-                    for (int i = 0; i < numPins; i++) { //get sum of all accuracy reading during the session
-                        sum += accuracyList.get(i);
-                    }
-                    averageAccuracy = (float) (sum / ((float) numPins)); //compute average accuracy readings
-
-                    TV.setText(""); //clear TextView
-                    reset();    //reset data values and write to file
+                    on = false; //if ON, turn OFF and reset
+                    reset();
+                    gMap.clear();
                 } else {
                     TV.setText(R.string.PressStart); //if numPins == 0, then it does not need to be reset because it's already empty
                     paused = false;
@@ -186,7 +172,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        viewData.setOnClickListener(new View.OnClickListener() {
+        viewDataBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!on && !paused)
@@ -267,16 +253,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         dateFormatDayAndTime = new SimpleDateFormat("MMM dd, yyyy hh:mm aa");
 
         //empty the lists
-        accuracyList.clear();
         timeList.clear();
-        distanceErrorList.clear();
 
         if(!useFusedLocation) locationManager = (LocationManager) getSystemService(LOCATION_SERVICE); //set up location managersetfaseddddd
 
         //define buttons and textview
-        start = findViewById(R.id.btnStartStop);
-        save = findViewById(R.id.btnSave);
-        viewData = findViewById(R.id.btnViewData);
+        startBtn = findViewById(R.id.btnStartStop);
+        resetBtn = findViewById(R.id.btnReset);
+        viewDataBtn = findViewById(R.id.btnViewData);
         TV = findViewById(R.id.TV);
 
         TV.setText(R.string.PressStart); //print starting message in textview
@@ -290,7 +274,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void reset() {   //resets all values and calls write function
 
-        if (numPins > 0) {//don't bother with this if there is no data to write
+            /* TODO: may eventually write stats to a file for later access
             FileOutputStream outputStream;  //declare output stream
             try {   //attempt to open and write to file
                 outputStream = openFileOutput(filename, Context.MODE_PRIVATE);  //open file and set to output stream
@@ -299,9 +283,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     writeData(i, outputStream); //write data
                 }
                 //empty the lists
-                accuracyList.clear();
-                timeList.clear();
-                distanceErrorList.clear();
 
                 outputStream.close(); //close file
 
@@ -309,15 +290,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 e.printStackTrace();
                 TV.setText("ERROR: \nDATA NOT WRITTEN");  //error message if file not found
             }
-        } else {
-            //empty the lists (probably not necessary here, but doing it just in case)
-            accuracyList.clear();
-            timeList.clear();
-            distanceErrorList.clear();
-        }
+            */
+
+        TV.setText(R.string.PressStart);    // tell user to press start when ready
+
 
         //reset values
-        numPins = 0;
+        timeList.clear();
+        positionList.clear();
         wasReset = true;
         setStartTime = false;
         zoomed = false;
@@ -333,6 +313,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void writeData(int i, FileOutputStream outputStream) {   //writes data to a .txt file
+        /*
         //print header:
         if (i == 0) {    //print time range of data points as header of data
             if (fileContents != null)   //if file already has data in there, use "+=" to add to it
@@ -364,7 +345,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //set fileContents to number, accuracy value, and timestamp [example: "#1)  9.0"  ] with fancy formatting
         //fileContents += ("#" + (i + 1) + ") \t\t" +(accuracyList.get(i).toString() + " \t\t" + (String.format("%.2f", distanceErrorList.get(i))) + " \t\t" + timeList.get(i) + "\n"));
 
-        fileContents += String.format("%-7s %s", ("#" + (i + 1) + ")"), String.format("%-10s %s", (accuracyList.get(i).toString()), (timeList.get(i) + "\n")));
+        fileContents += String.format("%-7s %s", ("#" + (i + 1) + ")"), String.format("%-10s %s", (timeList.get(i) + "\n")));
 
 
         if (i == numPins - 1) {  //end of data that must be written is reached
@@ -380,7 +361,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 myToast.show();
             }
         }
-
+        */
     }
 
     /* onMapReady:
@@ -420,16 +401,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //zoom in camera on last known location when app is initialized
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()))      // Sets the center of the map to location user
-                    .zoom(18f)                   // Set the zoom value
-                    .bearing(0)                // Point North
-                    .tilt(0)                   // No tilt
+                    .zoom(18f)                  // Set the zoom value
+                    .bearing(0)                 // Point North
+                    .tilt(0)                    // No tilt
                     .build();                   // Creates a CameraPosition from the builder
-            gMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));  //set camera to position defined above
             zoomed = true;  //camera has now been zoomed, does not need to happen again
         } else {
-            //if no last-known location, then center map over Wichita without zooming
-            LatLng wichita = new LatLng(37.6913, 262.6503);
-            gMap.moveCamera(CameraUpdateFactory.newLatLng(wichita));
+            //if no last-known location, then center map over arbitrary location without zooming
+            gMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(37.6913, 262.6503)));
             zoomed = false;
         }
     }
@@ -449,7 +428,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    void addMarker(){   //adds marker to map with label of number, accuracy reading, and color corresponding to accuracy reading
+    void drawPolyline(){   //adds marker to map with label of number, accuracy reading, and color corresponding to accuracy reading
         //TODO: make this draw a polyline instead of adding individual markers
         /*  Example Code:
                 Polyline polyline1 = googleMap.addPolyline(new PolylineOptions()
@@ -461,34 +440,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         new LatLng(-33.501, 150.217),
                         new LatLng(-32.306, 149.248),
                         new LatLng(-32.491, 147.309)));
-
          */
-        //set label for marker (accuracy and marker number)
-        markerLabel = accuracyList.get(numPins) + " #" + (++numPins);
 
-        //create instance of MarkerOptions
-        MarkerOptions markerOptions = new MarkerOptions();
-        //set marker options:
-        markerOptions.position(currentPosition);    //location of marker
-        markerOptions.title(markerLabel);   //label for marker
-
-        //set color of marker based on accuracy reading
-        if(accuracyList.get(numPins - 1) < 10) {   //if small error margin, marker is green
-            //note: numPins was previously incremented, so use numPins-1 as index
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-        }
-        else if (accuracyList.get(numPins - 1) < 25){   //if 10 <= accuracy < 25, yellow marker
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
-        }
-        else if (accuracyList.get(numPins - 1) < 100){   //else red marker for 25 <= accuracy < 100
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-        }
-        else { //else if accuracy >= 100
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
-        }
-
-        //add marker
-        gMap.addMarker(markerOptions);
+        PolylineOptions polyOptions = new PolylineOptions();
+        polyOptions.color(Color.GREEN);
+        polyOptions.width(5);               // TODO: make this a variable that user can input
+        polyOptions.addAll(positionList);
+        gMap.clear();
+        gMap.addPolyline(polyOptions);
     }
 
 /********************************************************************
@@ -509,7 +468,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     //for use when using GPS only
-    void GPSLocationDetails(){  //reads lat lng values, compares them to corret value (if specified), and calls addMarker() to put marker on the map
+    void GPSLocationDetails(){  //reads lat lng values, calls drawPolyline() to update Polyline
         locationListener = new LocationListener() { //setting up new location listener
             @Override
             public void onLocationChanged(Location location) {
@@ -534,22 +493,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     currentLatitude = location.getLatitude();
 
                     //set lat and long into LatLng type variable
-                    currentPosition = new LatLng(currentLatitude, currentLongitude);
-
-                    //get accuracy and put value into linked list.
-                    accuracyList.add(location.getAccuracy());
+                    positionList.add(new LatLng(currentLatitude, currentLongitude));
 
                     //display values on screen
-                    TV.setText("Running - #" + (numPins + 1) + " - " + location.getAccuracy());
+                    TV.setText(R.string.running);
 
                     //get time stamp
                     timeList.add(dateFormatTime.format(System.currentTimeMillis()));
 
                     //add marker to map with label and specific color
-                    addMarker();
+                    drawPolyline();
 
                     //update camera position
-                    gMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
+                    gMap.moveCamera(CameraUpdateFactory.newLatLng(positionList.getLast()));
 
                 }
             }
@@ -728,21 +684,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     currentLatitude = currentLocationResult.getLastLocation().getLatitude();
 
                     //set lat and long into LatLng type variable
-                    currentPosition = new LatLng(currentLatitude, currentLongitude);
+                    positionList.add(new LatLng(currentLatitude, currentLongitude));
 
-                    //get accuracy and put value into linked list.
-                    accuracyList.add(currentLocationResult.getLastLocation().getAccuracy());
 
                     //display values on screen
-                    TV.setText("Running - #" + (numPins + 1) + " - " + currentLocationResult.getLastLocation().getAccuracy());
+                    TV.setText(R.string.running);
 
                     //get time stamp
                     timeList.add(dateFormatTime.format(System.currentTimeMillis()));
 
-                    addMarker();  //add marker to map with label and specific color
+                    drawPolyline();  //add marker to map with label and specific color
 
                     //update camera position
-                    gMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
+                    gMap.moveCamera(CameraUpdateFactory.newLatLng(positionList.getLast()));
 
                 }
             }

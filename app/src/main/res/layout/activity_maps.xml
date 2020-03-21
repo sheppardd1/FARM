@@ -31,7 +31,7 @@
         android:gravity="center"
         android:text="TextView"
         android:textSize="18sp"
-        map:layout_constraintBottom_toTopOf="@+id/btnSave"
+        map:layout_constraintBottom_toTopOf="@+id/btnReset"
         map:layout_constraintEnd_toEndOf="parent"
         map:layout_constraintStart_toStartOf="parent"
         tools:layout_conversion_absoluteHeight="61dp"
@@ -44,17 +44,17 @@
         android:layout_marginBottom="16dp"
         android:text="@string/start"
         map:layout_constraintBottom_toBottomOf="parent"
-        map:layout_constraintEnd_toStartOf="@+id/btnSave"
+        map:layout_constraintEnd_toStartOf="@+id/btnReset"
         map:layout_constraintStart_toStartOf="parent"
         tools:layout_conversion_absoluteHeight="65dp"
         tools:layout_conversion_absoluteWidth="360dp" />
 
     <Button
-        android:id="@+id/btnSave"
+        android:id="@+id/btnReset"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:text="@string/save"
+        android:text="@string/reset"
         map:layout_constraintBottom_toBottomOf="parent"
         map:layout_constraintEnd_toEndOf="parent"
         map:layout_constraintStart_toStartOf="parent" />
@@ -67,7 +67,7 @@
         android:text="@string/view_data"
         map:layout_constraintBottom_toBottomOf="parent"
         map:layout_constraintEnd_toEndOf="parent"
-        map:layout_constraintStart_toEndOf="@+id/btnSave" />
+        map:layout_constraintStart_toEndOf="@+id/btnReset" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
