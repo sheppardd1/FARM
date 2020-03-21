@@ -1,7 +1,6 @@
 package com.example.davea.FARM;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -34,17 +33,13 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.internal.IGoogleMapDelegate;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -95,11 +90,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     boolean zoomed = false; //true if camera has zoomed in on location yet
     boolean locationPermissionGranted = false;  //true once location permission is granted. Used to ensure that location updates are only requested once
     boolean paused = false; //only true if paused (not running or stopped). Used to prevent ViewData activity from starting while paused
-    static boolean usingCriteria;  //true if specifying high accuracy criteria for location
     static boolean useFusedLocation; //true if user selects radio button for Fused Location Services, false if selected GPS
     static boolean setInterval = false; //true if user has specified GPS refresh rate
+    public static boolean useSatellite; // true if user opts to view map in satellite mode
     //LatLng:
-    //LatLng currentPosition;
     LinkedList<LatLng> positionList = new LinkedList<>();
     //Polyline
     Polyline pathPolyline;
@@ -127,8 +121,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         setup();    //initialize everything
-
-        assert !(usingCriteria && useFusedLocation);    //if this is true, there is a problem
 
         if (interval == 0 && setInterval) {
             //if user sets update interval to 0, warn of battery drain
@@ -267,7 +259,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         dataFile = new File(filename);//create file
 
-        if(!useFusedLocation && usingCriteria){
+        if(!useFusedLocation){  // if using GPS, set high accuracy criteria
             setCriteria();
         }
     }
@@ -375,6 +367,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {   //sets up google maps
         gMap = googleMap;   //set gMap to the 'inputted' googleMap
+        if(useSatellite) {
+            gMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        }else{
+            gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        }
 
         Criteria criteria = new Criteria(); //not completely sure how this works, but it does
 
@@ -429,18 +426,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     void drawPolyline(){   //adds marker to map with label of number, accuracy reading, and color corresponding to accuracy reading
-        //TODO: make this draw a polyline instead of adding individual markers
-        /*  Example Code:
-                Polyline polyline1 = googleMap.addPolyline(new PolylineOptions()
-                .clickable(true)
-                .add(
-                        new LatLng(-35.016, 143.321),
-                        new LatLng(-34.747, 145.592),
-                        new LatLng(-34.364, 147.891),
-                        new LatLng(-33.501, 150.217),
-                        new LatLng(-32.306, 149.248),
-                        new LatLng(-32.491, 147.309)));
-         */
 
         PolylineOptions polyOptions = new PolylineOptions();
         polyOptions.color(Color.GREEN);
@@ -547,22 +532,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //once permission is granted, set up location listener
                 //updating every "interval" milliseconds, regardless of distance change
                 else{
-                    if(usingCriteria) locationManager.requestLocationUpdates(interval, 0, locationCriteria, locationListener, null);
-                    else locationManager.requestLocationUpdates("gps", interval, 0, locationListener);
+                    locationManager.requestLocationUpdates(interval, 0, locationCriteria, locationListener, null);
                     locationPermissionGranted = true;
                 }
             }
             else {
-                if(usingCriteria) locationManager.requestLocationUpdates(interval, 0, locationCriteria, locationListener, null);
-                else locationManager.requestLocationUpdates("gps", interval, 0, locationListener);
+                locationManager.requestLocationUpdates(interval, 0, locationCriteria, locationListener, null);
                 locationPermissionGranted = true;
             }
 
         }   //else if below Marshmallow, we don't need to ask special permission
         else if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
             assert locationManager != null;
-            if(usingCriteria) locationManager.requestLocationUpdates(interval, 0, locationCriteria, locationListener, null);
-            else locationManager.requestLocationUpdates("gps", interval, 0, locationListener);
+            locationManager.requestLocationUpdates(interval, 0, locationCriteria, locationListener, null);
             locationPermissionGranted = true;
         }
         else{
