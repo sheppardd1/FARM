@@ -50,7 +50,9 @@ public class GetInterval extends AppCompatActivity {
                     MapsActivity.setInterval = true;    //ensures that this activity only runs once
                     if (MapsActivity.locationListener != null) {    //if there is a location listener set up, remove it
                         MapsActivity.locationManager.removeUpdates(MapsActivity.locationListener);  //ensures we only have one location listener running at once. Don't want duplicate data.
-                    }//TODO remove fused location listener too
+                    } else if (MapsActivity.useFusedLocation && MapsActivity.myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
+                        MapsActivity.myFusedLocationClient.removeLocationUpdates(MapsActivity.myLocationCallback);
+                    }
                     startActivity(new Intent(getApplicationContext(), MapsActivity.class)); // go to mapping activity
                 }
                 else if(radioIsSet){ //if radio is set, then interval is not

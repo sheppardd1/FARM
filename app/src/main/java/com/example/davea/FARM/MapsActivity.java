@@ -58,9 +58,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     static LocationManager locationManager;
     static LocationListener locationListener;
     //For Fused Location Provider:
-    FusedLocationProviderClient myFusedLocationClient;
+    public static FusedLocationProviderClient myFusedLocationClient;
     LocationRequest myLocationRequest;
-    LocationCallback myLocationCallback;
+    public static LocationCallback myLocationCallback;
     LocationResult currentLocationResult;
 
     //Files:
@@ -143,7 +143,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (wasReset) { //set wasReset to false
                         wasReset = false;
                     }
-                    gMap.animateCamera(CameraUpdateFactory.zoomTo(18f));
                 } else {
                     TV.setText(R.string.Paused);    //if not on after pressing start, session must be paused
                 }
@@ -159,6 +158,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     gMap.clear();
                 } else {
                     TV.setText(R.string.PressStart); //if numPins == 0, then it does not need to be reset because it's already empty
+                    reset();
+                    on = false;
                     paused = false;
                 }
             }
@@ -247,7 +248,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //empty the lists
         timeList.clear();
 
-        if(!useFusedLocation) locationManager = (LocationManager) getSystemService(LOCATION_SERVICE); //set up location managersetfaseddddd
+        if(!useFusedLocation) locationManager = (LocationManager) getSystemService(LOCATION_SERVICE); //set up location manager
 
         //define buttons and textview
         startBtn = findViewById(R.id.btnStartStop);
@@ -285,7 +286,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             */
 
         TV.setText(R.string.PressStart);    // tell user to press start when ready
-
 
         //reset values
         timeList.clear();
@@ -378,12 +378,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //get last known location
         Location lastLocation;
         //if using fused location and permissions are given
-        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED && useFusedLocation) {
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED && useFusedLocation) {
             lastLocation = myFusedLocationClient.getLastLocation().getResult();
         }
         //else if using GPS and permissions given
-        else if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && !useFusedLocation){
+        else if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && !useFusedLocation){
             try {
                 lastLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
             }catch (Exception e){
@@ -397,7 +401,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (lastLocation != null) {
             //zoom in camera on last known location when app is initialized
             CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()))      // Sets the center of the map to location user
+                    // Sets the center of the map to last location of user
+                    .target(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()))
                     .zoom(18f)                  // Set the zoom value
                     .bearing(0)                 // Point North
                     .tilt(0)                    // No tilt
@@ -433,6 +438,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         polyOptions.addAll(positionList);
         gMap.clear();
         gMap.addPolyline(polyOptions);
+
     }
 
 /********************************************************************
@@ -470,7 +476,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if(!zoomed){   //if map was not previously zoomed in, zoom it in now on current location
 
                         gMap.animateCamera(CameraUpdateFactory.zoomTo(18f));
-
                         zoomed = true;  //camera is now zoomed
                     }
                     //get lat and long
@@ -658,7 +663,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if(!zoomed){   //if map was not previously zoomed in, zoom it in now on current location
 
                         gMap.animateCamera(CameraUpdateFactory.zoomTo(18f));
-
                         zoomed = true;  //camera is now zoomed
                     }
                     //get lat and long
