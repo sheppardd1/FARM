@@ -35,6 +35,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -44,6 +46,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.LinkedList;
 
+import static com.google.maps.android.SphericalUtil.computeHeading;
+import static com.google.maps.android.SphericalUtil.computeOffset;
+import static com.google.maps.android.SphericalUtil.computeOffsetOrigin;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
 
     //Google Map:
@@ -51,6 +57,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //Constants:
     static final String filename = "GPS_data.txt";  //name of file where data is saved
+    static final int EARTH_RADIUS_FT = 20924640;    // approx radius of Earth in feet
 
     //Location:
     //For GPS only:
@@ -77,8 +84,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //int:
     static int interval = 0;    //refresh rate of GPS
-    //float and Float:
-    float averageAccuracy = -999;   //average of the accuracy readings from one session. Initialize to -999 so any errors are obvious
+    //float:
+    static float pathWidth = 5; // width of tractor in feet
     //String:
     static String fileContents; //Stuff that will be written to the file. It is static so that it can be accessed in other activity
     String time;    //the time in the dateFormatDayAndTime format (defined later). Used for giving start and end times of each session
@@ -95,8 +102,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static boolean useSatellite; // true if user opts to view map in satellite mode
     //LatLng:
     LinkedList<LatLng> positionList = new LinkedList<>();
-    //Polyline
-    Polyline pathPolyline;
     //Toast:
     Toast myToast = null;
 
@@ -118,6 +123,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        assert mapFragment != null;
         mapFragment.getMapAsync(this);
 
         setup();    //initialize everything
@@ -430,7 +436,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    void drawPolyline(){   //adds marker to map with label of number, accuracy reading, and color corresponding to accuracy reading
+    public void drawPolyline(){   //adds marker to map with label of number, accuracy reading, and color corresponding to accuracy reading
 
         PolylineOptions polyOptions = new PolylineOptions();
         polyOptions.color(Color.GREEN);
@@ -439,6 +445,47 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         gMap.clear();
         gMap.addPolyline(polyOptions);
 
+    }
+
+    public void drawPolygon(){
+
+        if(positionList.size()>1) { // draw polyline unless only 1 LatLng point had been taken so far
+            LatLng[] corners = getPolygonCorners(positionList.get(positionList.size() - 1), positionList.get(positionList.size() - 2));
+            Polygon polygon1 = gMap.addPolygon(new PolygonOptions()
+                    .clickable(true)
+                    .add(corners[0], corners[1], corners[2], corners[3])
+            );
+            // TODO: style the polygon
+        }
+
+    }
+
+    public LatLng[] getPolygonCorners(LatLng startLatLng, LatLng endLatLng){
+
+        LatLng[] corners = new LatLng[4];   // initialize array to hold corner LatLng values
+
+        // Picture a line going from startLatLng to endLatLng.
+        // The angle going clockwise from North to the line is theta.
+        /*
+              North      end
+                |        /
+                |      /
+                |..../
+                |  /
+                |/
+              start
+         */
+        double theta = computeHeading(startLatLng, endLatLng);
+        double phi = 90-theta;
+
+        double distance = (pathWidth/2) * 0.3048;   // distance from location point to edge of polygon
+        corners[0] = computeOffsetOrigin(startLatLng, distance, 360-phi);
+        corners[1] = computeOffsetOrigin(startLatLng, distance, 180-phi);
+        corners[2] = computeOffsetOrigin(endLatLng, distance, 180-phi);
+        corners[3] = computeOffsetOrigin(endLatLng, distance, 360-phi);
+
+        // TODO: set map to center on end point
+        return corners;
     }
 
 /********************************************************************
@@ -491,8 +538,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     //get time stamp
                     timeList.add(dateFormatTime.format(System.currentTimeMillis()));
 
-                    //add marker to map with label and specific color
-                    drawPolyline();
+                    drawPolygon();  //draw polygon on map
 
                     //update camera position
                     gMap.moveCamera(CameraUpdateFactory.newLatLng(positionList.getLast()));
@@ -679,7 +725,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     //get time stamp
                     timeList.add(dateFormatTime.format(System.currentTimeMillis()));
 
-                    drawPolyline();  //add marker to map with label and specific color
+                    drawPolygon();  //add polygon to map
 
                     //update camera position
                     gMap.moveCamera(CameraUpdateFactory.newLatLng(positionList.getLast()));
