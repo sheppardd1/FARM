@@ -115,6 +115,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //criteria for location:
     Criteria locationCriteria = new Criteria();
 
+    // polygon formatting
+    private static final int COLOR_BLACK_ARGB = 0x7f000000;
+    private static final int COLOR_WHITE_ARGB = 0x7fffffff;
+    private static final int COLOR_GREEN_ARGB = 0x7f388E3C;
+    private static final int COLOR_PURPLE_ARGB = 0x7f81C784;
+    private static final int COLOR_ORANGE_ARGB = 0x7fF57F17;
+    private static final int COLOR_BLUE_ARGB = 0x7fF9A825;
+
+    private static final int POLYGON_STROKE_WIDTH_PX = 2;
+    private static final int PATTERN_DASH_LENGTH_PX = 20;
+    private static final int PATTERN_GAP_LENGTH_PX = 20;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -456,6 +468,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .add(corners[0], corners[1], corners[2], corners[3])
             );
             // TODO: style the polygon
+
+            polygon1.setStrokeWidth(POLYGON_STROKE_WIDTH_PX);
+            polygon1.setStrokeColor(COLOR_GREEN_ARGB);
+            polygon1.setFillColor(COLOR_GREEN_ARGB);
         }
 
     }
@@ -484,7 +500,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         corners[2] = computeOffsetOrigin(endLatLng, distance, 180-phi);
         corners[3] = computeOffsetOrigin(endLatLng, distance, 360-phi);
 
-        // TODO: set map to center on end point
         return corners;
     }
 
