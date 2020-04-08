@@ -10,8 +10,8 @@
     <string name="share">Share</string>
     <string name="lat">(optional) Lat:</string>
     <string name="lng">(optional) Lng:</string>
-    <string name="interval">Update Interval:</string>
-    <string name="GetInterval_Instructions">"Enter the update interval in seconds"</string>string>
+    <string name="interval">Refresh Rate:</string>
+    <string name="GetInterval_Instructions">"Enter the Refresh Rate in seconds"</string>string>
     <string name="Method_Instructions">"Select Location Method"</string>string>
     <string name="MapType_Instructions">"Select Map Type"</string>string>
     <string name="GPS">Use GPS</string>
@@ -23,4 +23,6 @@
     <string name="Paused">PAUSED</string>
     <string name="running">RUNNING</string>
     <string name="GPSCriteria">Use GPS with High Accuracy Criteria</string>
+    <string name="enterWidth">Enter Vehicle Width in Feet</string>
+    <string name="enterWidth2">Width:</string>
 </resources>

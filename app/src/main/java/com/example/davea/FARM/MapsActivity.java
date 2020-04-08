@@ -85,7 +85,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //int:
     static int interval = 0;    //refresh rate of GPS
     //float:
-    static float pathWidth = 5; // width of tractor in feet
+    public static float pathWidth; // width of tractor in feet
     //String:
     static String fileContents; //Stuff that will be written to the file. It is static so that it can be accessed in other activity
     String time;    //the time in the dateFormatDayAndTime format (defined later). Used for giving start and end times of each session

@@ -15,7 +15,8 @@ import androidx.appcompat.app.AppCompatActivity;
 public class GetInterval extends AppCompatActivity {
 
     Toast myToast = null;
-    boolean radioIsSet = false;
+    boolean GPSRadioIsSet = false;
+    boolean MapRadioIsSet = false;
     RadioGroup locationChoiceRadioGroup;
     RadioGroup mapChoiceRadioGroup;
 
@@ -27,42 +28,55 @@ public class GetInterval extends AppCompatActivity {
 
         //setup UI
         final EditText interval_input = findViewById(R.id.interval_input);
+        final EditText width_input = findViewById(R.id.width_input);
         Button done = findViewById(R.id.done);
-        TextView TV1 = findViewById(R.id.interval_instructions);
-        TextView TV2 = findViewById(R.id.method_instructions);
-        TextView TV3 = findViewById(R.id.mapType_instructions);
         locationChoiceRadioGroup = findViewById(R.id.LocationChoiceRadioGroup);
         mapChoiceRadioGroup = findViewById(R.id.MapChoiceRadioGroup);
-
-        //print instructions
-        TV1.setText(R.string.GetInterval_Instructions);
-        TV2.setText(R.string.Method_Instructions);
-        TV3.setText(R.string.MapType_Instructions);
 
 
         done.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //note: using an unsigned EditText for interval, so don't have to worry about negative numbers there
-                if(interval_input.getText().toString().trim().length() > 0 && radioIsSet) {   //ensure interval_input is not empty and radio button is set
-                    MapsActivity.interval = Integer.valueOf(interval_input.getText().toString()); //set interval to value specified in interval_input
+                //Ensure interval_input and width_input are not empty and radio button is set
+                if(interval_input.getText().toString().trim().length() > 0
+                        && width_input.getText().toString().trim().length() > 0 && GPSRadioIsSet && MapRadioIsSet) {
+
+                    // set width and interval values
+                    MapsActivity.pathWidth = Float.parseFloat(width_input.getText().toString());   //set path width
+                    MapsActivity.interval = Integer.parseInt(interval_input.getText().toString()); //set interval to value specified in interval_input
                     MapsActivity.interval *= 1000;  //convert seconds into milliseconds
                     MapsActivity.setInterval = true;    //ensures that this activity only runs once
+
+                    // watch out for previously set location listeners
                     if (MapsActivity.locationListener != null) {    //if there is a location listener set up, remove it
                         MapsActivity.locationManager.removeUpdates(MapsActivity.locationListener);  //ensures we only have one location listener running at once. Don't want duplicate data.
                     } else if (MapsActivity.useFusedLocation && MapsActivity.myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
                         MapsActivity.myFusedLocationClient.removeLocationUpdates(MapsActivity.myLocationCallback);
                     }
-                    startActivity(new Intent(getApplicationContext(), MapsActivity.class)); // go to mapping activity
+
+                    // All good! Go to mapping activity.
+                    startActivity(new Intent(getApplicationContext(), MapsActivity.class));
+
                 }
-                else if(radioIsSet){ //if radio is set, then interval is not
+                else if(interval_input.getText().toString().trim().length() == 0){  //if interval not set
                     if(myToast != null) myToast.cancel();
                     myToast = Toast.makeText(getApplicationContext(), "Must Enter Interval Value", Toast.LENGTH_SHORT);
                     myToast.show();
                 }
-                else{ //else radio is not set
+                else if(width_input.getText().toString().trim().length() == 0){ //if width not set
+                    if(myToast != null) myToast.cancel();
+                    myToast = Toast.makeText(getApplicationContext(), "Must Enter Width Value", Toast.LENGTH_SHORT);
+                    myToast.show();
+                }
+                else if (!GPSRadioIsSet){   // if GPS radio is not set
                     if(myToast != null) myToast.cancel();
                     myToast = Toast.makeText(getApplicationContext(), "Must choose location type\n(GPS or Fused)", Toast.LENGTH_SHORT);
+                    myToast.show();
+                }
+                else {    //else Map type radio is not set
+                    if(myToast != null) myToast.cancel();
+                    myToast = Toast.makeText(getApplicationContext(), "Must choose map type\n(regular or satellite)", Toast.LENGTH_SHORT);
                     myToast.show();
                 }
             }
@@ -78,13 +92,13 @@ public class GetInterval extends AppCompatActivity {
             case R.id.radio_GPS:
                 if (checked) {
                     MapsActivity.useFusedLocation = false;
-                    radioIsSet = true;  //once a radio button is checked, user cannot uncheck all buttons
+                    GPSRadioIsSet = true;  //once a radio button is checked, user cannot uncheck all buttons
                 }
             break;
             case R.id.radio_Fused:
             if (checked) {
-                MapsActivity.useFusedLocation = true;
-                    radioIsSet = true;  //once a radio button is checked, user cannot uncheck all buttons
+                    MapsActivity.useFusedLocation = true;
+                    GPSRadioIsSet = true;  //once a radio button is checked, user cannot uncheck all buttons
                 }
             break;
         }
@@ -93,13 +107,13 @@ public class GetInterval extends AppCompatActivity {
             case R.id.radio_regular:
                 if (checked) {
                     MapsActivity.useSatellite = false;
-                    radioIsSet = true;  //once a radio button is checked, user cannot uncheck all buttons
+                    MapRadioIsSet = true;  //once a radio button is checked, user cannot uncheck all buttons
                 }
                 break;
             case R.id.radio_satellite:
                 if (checked) {
                     MapsActivity.useSatellite = true;
-                    radioIsSet = true;  //once a radio button is checked, user cannot uncheck all buttons
+                    MapRadioIsSet = true;  //once a radio button is checked, user cannot uncheck all buttons
                 }
                 break;
         }
