@@ -171,13 +171,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 if (on) {
-                    on = false; //if ON, turn OFF and reset
-                    reset();
-                    gMap.clear();
-                } else {
-                    TV.setText(R.string.PressStart); //if numPins == 0, then it does not need to be reset because it's already empty
+                    on = false; //if ON, pause
+                    paused = true;
+                    TV.setText(R.string.Paused3);
+                } else {    // if already paused, reset everythingand clear map
+                    TV.setText(R.string.PressStart);
                     reset();
                     on = false;
+                    gMap.clear();
                     paused = false;
                 }
             }

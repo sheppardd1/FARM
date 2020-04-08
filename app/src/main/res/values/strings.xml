@@ -20,6 +20,7 @@
     <string name="satellite">Satellite</string>
     <string name="PressStart">Press START to begin</string>
     <string name="Paused2">PAUSED - press again to write</string>
+    <string name="Paused3">PAUSED - press again to clear</string>
     <string name="Paused">PAUSED</string>
     <string name="running">RUNNING</string>
     <string name="GPSCriteria">Use GPS with High Accuracy Criteria</string>
