@@ -157,8 +157,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 on = !on;   //invert on. Toggles between start and paused
                 if (on) {
-                    if (wasReset) gMap.clear();  //clear map when starting after a reset
-
                     TV.setText(R.string.running);  //display session status
                     locationDetails();  //get location info
                     if (wasReset) { //set wasReset to false
@@ -182,6 +180,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     reset();
                     on = false;
                     gMap.clear();
+                    drawField();
                     paused = false;
                 }
             }
@@ -400,17 +399,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // draw field polygon
         if(SelectField.edges != null && SelectField.edges.size() > 2) {
-            Polygon field = gMap.addPolygon(new PolygonOptions()
-                    .clickable(true)
-                    .addAll(SelectField.edges)
-            );
-            field.setStrokeWidth(POLYGON_STROKE_WIDTH_PX);
-            field.setStrokeColor(COLOR_BLACK_ARGB);
-            field.setFillColor(COLOR_WHITE_ARGB);
-
-            final LatLngBounds latLngBounds = getPolygonLatLngBounds(SelectField.edges);
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, POLYGON_PADDING_PREFERENCE));
-            zoomed = true;
+            drawField();
         }
         else{
             //get last known location
@@ -451,6 +440,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 zoomed = false;
             }
         }
+    }
+
+    private void drawField(){
+        Polygon field = gMap.addPolygon(new PolygonOptions()
+                .clickable(true)
+                .addAll(SelectField.edges)
+        );
+        field.setStrokeWidth(POLYGON_STROKE_WIDTH_PX);
+        field.setStrokeColor(COLOR_BLACK_ARGB);
+        field.setFillColor(COLOR_WHITE_ARGB);
+
+        final LatLngBounds latLngBounds = getPolygonLatLngBounds(SelectField.edges);
+        gMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, POLYGON_PADDING_PREFERENCE));
+        zoomed = true;
     }
 
     private static LatLngBounds getPolygonLatLngBounds(final List<LatLng> polygon) {
