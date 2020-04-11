@@ -54,7 +54,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/drawFieldSwitch" />
+        app:layout_constraintTop_toBottomOf="@+id/drawFieldCheckBox" />
 
     <TextView
         android:id="@+id/textView4"
@@ -246,16 +246,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/MapChoiceRadioGroup" />
 
-    <Switch
-        android:id="@+id/drawFieldSwitch"
+    <CheckBox
+        android:id="@+id/drawFieldCheckBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
-        android:layoutDirection="rtl"
         android:text="@string/drawFieldToggle"
-        android:textAlignment="viewEnd"
+        android:textAlignment="viewStart"
         android:textColor="#000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

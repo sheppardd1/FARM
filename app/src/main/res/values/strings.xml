@@ -33,7 +33,7 @@
     <string name="drawField">"Tap on the map to draw area of the field"</string>
     <string name="drawFieldError">"Must have at least 3 points or none at all!"</string>
     <string name="drawFieldYN">"Would you like to specify field area?"</string>
-    <string name="drawFieldToggle">"   I want to draw my field"</string>
+    <string name="drawFieldToggle">"I want to draw my field"</string>
 
 
 
