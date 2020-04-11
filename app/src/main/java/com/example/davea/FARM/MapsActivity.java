@@ -208,6 +208,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onResume() {
         super.onResume();
         reset();
+        if(gMap!=null) gMap.clear();
         TV.setText(R.string.PressStart);
     }
 
@@ -443,17 +444,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void drawField(){
-        Polygon field = gMap.addPolygon(new PolygonOptions()
-                .clickable(true)
-                .addAll(SelectField.edges)
-        );
-        field.setStrokeWidth(POLYGON_STROKE_WIDTH_PX);
-        field.setStrokeColor(COLOR_BLACK_ARGB);
-        field.setFillColor(COLOR_WHITE_ARGB);
+        if(SelectField.edges != null && SelectField.edges.size() > 2) {
+            Polygon field = gMap.addPolygon(new PolygonOptions()
+                    .clickable(true)
+                    .addAll(SelectField.edges)
+            );
+            field.setStrokeWidth(POLYGON_STROKE_WIDTH_PX);
+            field.setStrokeColor(COLOR_BLACK_ARGB);
+            field.setFillColor(COLOR_WHITE_ARGB);
 
-        final LatLngBounds latLngBounds = getPolygonLatLngBounds(SelectField.edges);
-        gMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, POLYGON_PADDING_PREFERENCE));
-        zoomed = true;
+            final LatLngBounds latLngBounds = getPolygonLatLngBounds(SelectField.edges);
+            gMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, POLYGON_PADDING_PREFERENCE));
+            zoomed = true;
+        }
     }
 
     private static LatLngBounds getPolygonLatLngBounds(final List<LatLng> polygon) {
