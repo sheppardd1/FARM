@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
+
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -120,10 +121,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // polygon formatting
     private static final int COLOR_BLACK_ARGB = 0x7f000000;
-    private static final int COLOR_WHITE_ARGB = 0x7fffffff;
+    private static final int COLOR_WHITE_ARGB = 0x3fffffff;
     private static final int COLOR_GREEN_ARGB = 0x7f388E3C;
     private static final int COLOR_PURPLE_ARGB = 0x7f81C784;
-    private static final int COLOR_ORANGE_ARGB = 0x7fF57F17;
+    private static final int COLOR_ORANGE_ARGB = 0xC0F57F17;
     private static final int COLOR_BLUE_ARGB = 0x7fF9A825;
 
     private static final int POLYGON_STROKE_WIDTH_PX = 2;
@@ -202,15 +203,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-/********************************************************************
- *Activity Functions:
- ********************************************************************/
+    /********************************************************************
+     *Activity Functions:
+     ********************************************************************/
 
     @Override
     protected void onResume() {
         super.onResume();
         reset();
-        if(gMap!=null) gMap.clear();
+        if (gMap != null) gMap.clear();
         TV.setText(R.string.PressStart);
     }
 
@@ -218,10 +219,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onPause() {  //remove location updates when paused
         super.onPause();
         //remove updates
-        if(useFusedLocation != null && useFusedLocation.booleanValue() && myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
+        if (useFusedLocation != null && useFusedLocation.booleanValue() && myLocationCallback != null) { //if using fused location and myLocaationCallback is not null
             myFusedLocationClient.removeLocationUpdates(myLocationCallback);
-        }
-        else if(useFusedLocation != null && !useFusedLocation.booleanValue() && locationListener != null){ //if using GPS only and locationListener is not null
+        } else if (useFusedLocation != null && !useFusedLocation.booleanValue() && locationListener != null) { //if using GPS only and locationListener is not null
             locationManager.removeUpdates(locationListener); //stop location updates, also ensures no duplicate update requests
         }
         //else methods needed for location have not been instantiated (are still null) so we don't need to remove location updates (if we try, app will crash)
@@ -233,10 +233,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onStop() {
         super.onStop();
         //remove updates
-        if(useFusedLocation != null && useFusedLocation.booleanValue() && myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
+        if (useFusedLocation != null && useFusedLocation.booleanValue() && myLocationCallback != null) { //if using fused location and myLocaationCallback is not null
             myFusedLocationClient.removeLocationUpdates(myLocationCallback);
-        }
-        else if(useFusedLocation != null && !useFusedLocation.booleanValue() && locationListener != null){ //if using GPS only and locationListener is not null
+        } else if (useFusedLocation != null && !useFusedLocation.booleanValue() && locationListener != null) { //if using GPS only and locationListener is not null
             locationManager.removeUpdates(locationListener); //stop location updates, also ensures no duplicate update requests
         }
         //else methods needed for location have not been instantiated (are still null) so we don't need to remove location updates (if we try, app will crash)
@@ -252,9 +251,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-/********************************************************************
- *Functions used regardless of location method:
- ********************************************************************/
+    /********************************************************************
+     *Functions used regardless of location method:
+     ********************************************************************/
 
 
     public void setup() {   //initializes basic vars and UI stuff
@@ -272,8 +271,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //empty the lists
         timeList.clear();
 
-        if(useFusedLocation != null && !useFusedLocation.booleanValue()){
+        if (useFusedLocation != null && !useFusedLocation) {
             locationManager = (LocationManager) getSystemService(LOCATION_SERVICE); //set up location manager
+        } else if (useFusedLocation != null) {
+            myFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         }
 
         //define buttons and textview
@@ -286,7 +287,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         dataFile = new File(filename);//create file
 
-        if(useFusedLocation != null && !useFusedLocation.booleanValue()){  // if using GPS, set high accuracy criteria
+        if (useFusedLocation != null && !useFusedLocation) {  // if using GPS, set high accuracy criteria
             setCriteria();
         }
 
@@ -323,10 +324,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationPermissionGranted = false; // ensures that location updates are restarted by forcing locationDetails() to call a getPermissions function
 
         //remove updates (saves battery)
-        if(useFusedLocation != null && useFusedLocation.booleanValue() && myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
+        if (useFusedLocation != null && useFusedLocation && myLocationCallback != null) { //if using fused location and myLocaationCallback is not null
             myFusedLocationClient.removeLocationUpdates(myLocationCallback);
-        }
-        else if(useFusedLocation != null && !useFusedLocation.booleanValue() && locationListener != null){ //if using GPS only and locationListener is not null
+        } else if (useFusedLocation != null && !useFusedLocation && locationListener != null) { //if using GPS only and locationListener is not null
             locationManager.removeUpdates(locationListener); //stop location updates, also ensures no duplicate update requests
         } //else methods needed for location have not been instantiated (are still null) so we don't need to remove location updates (if we try, app will crash))
     }
@@ -394,50 +394,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {   //sets up google maps
         gMap = googleMap;   //set gMap to the 'inputted' googleMap
-        if(useSatellite != null && useSatellite.booleanValue()) {
+        if (useSatellite != null && useSatellite) {
             gMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-        }else{
+        } else {
             gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         }
 
         Criteria criteria = new Criteria(); //not completely sure how this works, but it does
 
         // draw field polygon
-        if(SelectField.edges != null && SelectField.edges.size() > 2) {
+        if (SelectField.edges != null && SelectField.edges.size() > 2) {
             drawField();
-        }
-        else{
+        } else {
             //get last known location
-            Location lastLocation;
-            //if using fused location and permissions are given
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED
-                    &&
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                            != PackageManager.PERMISSION_GRANTED && useFusedLocation != null && useFusedLocation.booleanValue()) {
-                lastLocation = myFusedLocationClient.getLastLocation().getResult();
-            }
-            //else if using GPS and permissions given
-            else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED && useFusedLocation != null && !useFusedLocation.booleanValue()) {
-                try {
-                    lastLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
-                } catch (Exception e) {
-                    lastLocation = null;
-                }
-            } else {   //else cannot get last location
-                lastLocation = null;
-            }
+            Location lastLocation = getBestLastLocation();
 
             if (lastLocation != null) {
                 //zoom in camera on last known location when app is initialized
-                CameraPosition cameraPosition = new CameraPosition.Builder()
-                        // Sets the center of the map to last location of user
-                        .target(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()))
-                        .zoom(gMap.getMaxZoomLevel())   // Set the zoom value
-                        .bearing(0)                 // Point North
-                        .tilt(0)                    // No tilt
-                        .build();                   // Creates a CameraPosition from the builder
+                gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 15));
                 zoomed = true;  //camera has now been zoomed, does not need to happen again
             } else {
                 //if no last-known location, then center map over arbitrary location without zooming
@@ -445,6 +419,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 zoomed = false;
             }
         }
+    }
+
+    private Location getBestLastLocation() {
+        LocationManager mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = mLocationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                getPermissionsCOARSEandFINE();
+            }
+            Location lastLocation = null;
+            try {
+                lastLocation = mLocationManager.getLastKnownLocation(provider);
+            }catch (Exception e){}
+
+            if (lastLocation == null) {
+                continue;
+            }
+            if (bestLocation == null || lastLocation.getAccuracy() < bestLocation.getAccuracy()) {
+                // Found best last known location: %s", l);
+                bestLocation = lastLocation;
+            }
+        }
+        return bestLocation;
     }
 
     private void drawField(){
@@ -475,7 +476,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if(on) { //ensures the program is "on"
             if(useFusedLocation != null && useFusedLocation.booleanValue()){
-                myFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
                 FusedLocationDetails();
             }
             else {
@@ -495,8 +495,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // TODO: style the polygon
 
             polygon1.setStrokeWidth(POLYGON_STROKE_WIDTH_PX);
-            polygon1.setStrokeColor(COLOR_GREEN_ARGB);
-            polygon1.setFillColor(COLOR_GREEN_ARGB);
+            polygon1.setStrokeColor(COLOR_ORANGE_ARGB);
+            polygon1.setFillColor(COLOR_ORANGE_ARGB);
         }
 
     }

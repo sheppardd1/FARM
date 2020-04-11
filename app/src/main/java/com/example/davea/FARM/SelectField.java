@@ -1,8 +1,13 @@
 package com.example.davea.FARM;
 
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.service.autofill.TextValueSanitizer;
 import android.view.View;
@@ -21,14 +26,17 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.maps.android.SphericalUtil;
 
+import java.text.DecimalFormat;
 import java.util.LinkedList;
+import java.util.List;
 
 public class SelectField extends FragmentActivity implements OnMapReadyCallback {
 
     // polygon formatting
     private static final int COLOR_BLACK_ARGB = 0x7f000000;
-    private static final int COLOR_WHITE_ARGB = 0x7fffffff;
+    private static final int COLOR_WHITE_ARGB = 0x3fffffff;
     private static final int COLOR_GREEN_ARGB = 0x7f388E3C;
     private static final int COLOR_PURPLE_ARGB = 0x7f81C784;
     private static final int COLOR_ORANGE_ARGB = 0x7fF57F17;
@@ -46,6 +54,8 @@ public class SelectField extends FragmentActivity implements OnMapReadyCallback 
 
     Polygon field;
     GoogleMap gMap;
+
+    DecimalFormat decimalFormat = new DecimalFormat("#.00");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,10 +120,21 @@ public class SelectField extends FragmentActivity implements OnMapReadyCallback 
     public void onMapReady(GoogleMap googleMap) {
         gMap = googleMap;
         // setup map
-        if(MapsActivity.useSatellite.booleanValue()) {
+        if(MapsActivity.useSatellite) {
             gMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         }else{
             gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        }
+
+        //get last known location
+        Location lastLocation = getBestLastLocation();
+
+        if (lastLocation != null) {
+            //zoom in camera on last known location when app is initialized
+            gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 15));
+        } else {
+            //if no last-known location, then center map over arbitrary location without zooming
+            gMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(37.6913, 262.6503)));
         }
 
         gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -128,6 +149,38 @@ public class SelectField extends FragmentActivity implements OnMapReadyCallback 
         });
 
     }
+
+    private Location getBestLastLocation() {
+        // try to get last location. If user has not granted necessary permissions, don't bother
+
+        LocationManager mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+        assert mLocationManager != null;
+        List<String> providers = mLocationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+
+                Location lastLocation = null;
+                try {
+                    lastLocation = mLocationManager.getLastKnownLocation(provider);
+                }catch (Exception ignored){}
+
+                if (lastLocation == null) {
+                    continue;
+                }
+                if (bestLocation == null || lastLocation.getAccuracy() < bestLocation.getAccuracy()) {
+                    // Found best last known location: %s", l);
+                    bestLocation = lastLocation;
+                }
+            }
+
+        }
+        return bestLocation;
+    }
+
 
     public void drawPolygon(){
 
@@ -145,6 +198,13 @@ public class SelectField extends FragmentActivity implements OnMapReadyCallback 
             field.setStrokeWidth(POLYGON_STROKE_WIDTH_PX);
             field.setStrokeColor(COLOR_BLACK_ARGB);
             field.setFillColor(COLOR_WHITE_ARGB);
+            double area = SphericalUtil.computeArea(edges);
+            area *= 0.00024711; //convert to acres
+            String acre_string = decimalFormat.format(area);
+            TV.setText("Total Area: " + acre_string + " acres");
+        }
+        else if (edges != null && edges.size() < 3){
+            TV.setText(R.string.drawFieldInstructions);
         }
 
 
