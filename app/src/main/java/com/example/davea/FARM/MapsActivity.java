@@ -35,6 +35,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -45,6 +46,7 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.LinkedList;
+import java.util.List;
 
 import static com.google.maps.android.SphericalUtil.computeHeading;
 import static com.google.maps.android.SphericalUtil.computeOffset;
@@ -58,6 +60,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //Constants:
     static final String filename = "GPS_data.txt";  //name of file where data is saved
     static final int EARTH_RADIUS_FT = 20924640;    // approx radius of Earth in feet
+    final int POLYGON_PADDING_PREFERENCE = 10;      // padding around user-defined field that map zooms to
 
     //Location:
     //For GPS only:
@@ -74,7 +77,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     File dataFile;
 
     //UI:
-    Button startBtn, resetBtn, viewDataBtn;  //self-explanatory buttons
+    Button startBtn, resetBtn, settingsBtn;  //self-explanatory buttons
     TextView TV;    //only textview
 
     //variables:
@@ -174,7 +177,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     on = false; //if ON, pause
                     paused = true;
                     TV.setText(R.string.Paused3);
-                } else {    // if already paused, reset everythingand clear map
+                } else {    // if already paused, reset everything and clear map
                     TV.setText(R.string.PressStart);
                     reset();
                     on = false;
@@ -184,14 +187,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        viewDataBtn.setOnClickListener(new View.OnClickListener() {
+        settingsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!on && !paused)
-                    startActivity(new Intent(getApplicationContext(), ViewData.class));    //go to activity where file contents are viewed
+                    startActivity(new Intent(getApplicationContext(), SelectField.class));    //go to map boundary setting activity
                 else {
                     if (myToast != null) myToast.cancel();
-                    myToast = Toast.makeText(MapsActivity.this, "Must stop process before viewing data", Toast.LENGTH_SHORT);
+                    myToast = Toast.makeText(MapsActivity.this, "Must stop process before going to settings", Toast.LENGTH_SHORT);
                     myToast.show();
                 }
             }
@@ -272,7 +275,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //define buttons and textview
         startBtn = findViewById(R.id.btnStartStop);
         resetBtn = findViewById(R.id.btnReset);
-        viewDataBtn = findViewById(R.id.btnViewData);
+        settingsBtn = findViewById(R.id.btnViewData);
         TV = findViewById(R.id.TV);
 
         TV.setText(R.string.PressStart); //print starting message in textview
@@ -282,6 +285,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if(!useFusedLocation){  // if using GPS, set high accuracy criteria
             setCriteria();
         }
+
     }
 
     public void reset() {   //resets all values and calls write function
@@ -394,46 +398,68 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Criteria criteria = new Criteria(); //not completely sure how this works, but it does
 
-        //get last known location
-        Location lastLocation;
-        //if using fused location and permissions are given
-        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED
-                &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED && useFusedLocation) {
-            lastLocation = myFusedLocationClient.getLastLocation().getResult();
+        // draw field polygon
+        if(SelectField.edges != null && SelectField.edges.size() > 2) {
+            Polygon field = gMap.addPolygon(new PolygonOptions()
+                    .clickable(true)
+                    .addAll(SelectField.edges)
+            );
+            field.setStrokeWidth(POLYGON_STROKE_WIDTH_PX);
+            field.setStrokeColor(COLOR_BLACK_ARGB);
+            field.setFillColor(COLOR_WHITE_ARGB);
+
+            final LatLngBounds latLngBounds = getPolygonLatLngBounds(SelectField.edges);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, POLYGON_PADDING_PREFERENCE));
+            zoomed = true;
         }
-        //else if using GPS and permissions given
-        else if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED && !useFusedLocation){
-            try {
-                lastLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
-            }catch (Exception e){
+        else{
+            //get last known location
+            Location lastLocation;
+            //if using fused location and permissions are given
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED
+                    &&
+                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED && useFusedLocation) {
+                lastLocation = myFusedLocationClient.getLastLocation().getResult();
+            }
+            //else if using GPS and permissions given
+            else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED && !useFusedLocation) {
+                try {
+                    lastLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+                } catch (Exception e) {
+                    lastLocation = null;
+                }
+            } else {   //else cannot get last location
                 lastLocation = null;
             }
-        }
-        else{   //else cannot get last location
-            lastLocation = null;
-        }
 
-        if (lastLocation != null) {
-            //zoom in camera on last known location when app is initialized
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    // Sets the center of the map to last location of user
-                    .target(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()))
-                    .zoom(18f)                  // Set the zoom value
-                    .bearing(0)                 // Point North
-                    .tilt(0)                    // No tilt
-                    .build();                   // Creates a CameraPosition from the builder
-            zoomed = true;  //camera has now been zoomed, does not need to happen again
-        } else {
-            //if no last-known location, then center map over arbitrary location without zooming
-            gMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(37.6913, 262.6503)));
-            zoomed = false;
+            if (lastLocation != null) {
+                //zoom in camera on last known location when app is initialized
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        // Sets the center of the map to last location of user
+                        .target(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()))
+                        .zoom(gMap.getMaxZoomLevel())   // Set the zoom value
+                        .bearing(0)                 // Point North
+                        .tilt(0)                    // No tilt
+                        .build();                   // Creates a CameraPosition from the builder
+                zoomed = true;  //camera has now been zoomed, does not need to happen again
+            } else {
+                //if no last-known location, then center map over arbitrary location without zooming
+                gMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(37.6913, 262.6503)));
+                zoomed = false;
+            }
         }
     }
 
+    private static LatLngBounds getPolygonLatLngBounds(final List<LatLng> polygon) {
+        final LatLngBounds.Builder centerBuilder = LatLngBounds.builder();
+        for (LatLng point : polygon) {
+            centerBuilder.include(point);
+        }
+        return centerBuilder.build();
+    }
 
     public void locationDetails() { //chooses which location function to use based on user's choice on location method
 
@@ -446,18 +472,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 GPSLocationDetails();
             }
         }
-    }
-
-
-    public void drawPolyline(){   //adds marker to map with label of number, accuracy reading, and color corresponding to accuracy reading
-
-        PolylineOptions polyOptions = new PolylineOptions();
-        polyOptions.color(Color.GREEN);
-        polyOptions.width(5);               // TODO: make this a variable that user can input
-        polyOptions.addAll(positionList);
-        gMap.clear();
-        gMap.addPolyline(polyOptions);
-
     }
 
     public void drawPolygon(){
@@ -538,7 +552,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                     if(!zoomed){   //if map was not previously zoomed in, zoom it in now on current location
 
-                        gMap.animateCamera(CameraUpdateFactory.zoomTo(18f));
+                        gMap.animateCamera(CameraUpdateFactory.zoomTo(gMap.getMaxZoomLevel()));
                         zoomed = true;  //camera is now zoomed
                     }
                     //get lat and long
@@ -724,7 +738,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                     if(!zoomed){   //if map was not previously zoomed in, zoom it in now on current location
 
-                        gMap.animateCamera(CameraUpdateFactory.zoomTo(18f));
+                        gMap.animateCamera(CameraUpdateFactory.zoomTo(gMap.getMaxZoomLevel()));
                         zoomed = true;  //camera is now zoomed
                     }
                     //get lat and long

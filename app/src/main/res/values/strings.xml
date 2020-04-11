@@ -26,4 +26,11 @@
     <string name="GPSCriteria">Use GPS with High Accuracy Criteria</string>
     <string name="enterWidth">Enter Vehicle Width in Feet</string>
     <string name="enterWidth2">Width:</string>
+    <string name="title_activity_select_field">SelectField</string>
+    <string name="undo">Undo</string>
+    <string name="Done">Done</string>
+    <string name="settings">Settings</string>
+    <string name="drawField">"Tap on the map to draw area of the field"</string>
+    <string name="drawFieldError">"Must have at least 3 points or none at all!"</string>
+
 </resources>

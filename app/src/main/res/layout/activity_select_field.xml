@@ -26,45 +26,34 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:gravity="center"
-        android:text="TextView"
         android:textSize="18sp"
-        map:layout_constraintBottom_toTopOf="@+id/btnReset"
+        map:layout_constraintBottom_toTopOf="@+id/btnUndo"
         map:layout_constraintEnd_toEndOf="parent"
         map:layout_constraintStart_toStartOf="parent"
         tools:layout_conversion_absoluteHeight="61dp"
         tools:layout_conversion_absoluteWidth="360dp" />
 
     <Button
-        android:id="@+id/btnStartStop"
+        android:id="@+id/btnDone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="@string/start"
+        android:text="@string/Done"
         map:layout_constraintBottom_toBottomOf="parent"
-        map:layout_constraintEnd_toStartOf="@+id/btnReset"
+        map:layout_constraintEnd_toStartOf="@+id/TV"
         map:layout_constraintStart_toStartOf="parent"
         tools:layout_conversion_absoluteHeight="65dp"
         tools:layout_conversion_absoluteWidth="360dp" />
 
     <Button
-        android:id="@+id/btnReset"
+        android:id="@+id/btnUndo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="@string/reset"
+        android:text="@string/undo"
         map:layout_constraintBottom_toBottomOf="parent"
         map:layout_constraintEnd_toEndOf="parent"
-        map:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/btnViewData"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="@string/settings"
-        map:layout_constraintBottom_toBottomOf="parent"
-        map:layout_constraintEnd_toEndOf="parent"
-        map:layout_constraintStart_toEndOf="@+id/btnReset" />
+        map:layout_constraintStart_toEndOf="@+id/TV" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
