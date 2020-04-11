@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:gravity="center"
-        android:text="TextView"
+        android:text="@string/PressStart"
         android:textColor="#000000"
         android:textSize="18sp"
         map:layout_constraintBottom_toTopOf="@+id/btnReset"
