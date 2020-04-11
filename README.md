@@ -6,6 +6,8 @@ Plots path traveled by the user with rectuangles of a given width in feet. Based
 * Adjust width of polyline based on user-defined tractor width
 * Give user ability to define field area on map by adding points to create a polygon
 ## Dependencies
-* The app is dependent on the 
-* Link to documentation: https://developers.google.com/maps/documentation/android-sdk/utility/setup
+* The app is dependent on the android-maps-utils library
+* Link to documentation: 
+    * https://developers.google.com/maps/documentation/android-sdk/utility/setup
+    * https://github.com/googlemaps/android-maps-utils
 * To import this library, use the 3rd set of instructions given at https://o7planning.org/en/10525/how-to-add-external-libraries-to-android-project-in-android-studio
