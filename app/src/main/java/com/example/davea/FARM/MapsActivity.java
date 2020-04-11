@@ -86,9 +86,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     double currentLatitude;     //current lat
 
     //int:
-    static int interval = 0;    //refresh rate of GPS
+    static int interval = -1;    //refresh rate of GPS
     //float:
-    public static float pathWidth; // width of tractor in feet
+    public static float pathWidth = -1; // width of tractor in feet
     //String:
     static String fileContents; //Stuff that will be written to the file. It is static so that it can be accessed in other activity
     String time;    //the time in the dateFormatDayAndTime format (defined later). Used for giving start and end times of each session
@@ -100,9 +100,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     boolean zoomed = false; //true if camera has zoomed in on location yet
     boolean locationPermissionGranted = false;  //true once location permission is granted. Used to ensure that location updates are only requested once
     boolean paused = false; //only true if paused (not running or stopped). Used to prevent ViewData activity from starting while paused
-    static boolean useFusedLocation; //true if user selects radio button for Fused Location Services, false if selected GPS
+    static Boolean useFusedLocation = null; //true if user selects radio button for Fused Location Services, false if selected GPS
     static boolean setInterval = false; //true if user has specified GPS refresh rate
-    public static boolean useSatellite; // true if user opts to view map in satellite mode
+    public static Boolean useSatellite = null; // true if user opts to view map in satellite mode
     //LatLng:
     LinkedList<LatLng> positionList = new LinkedList<>();
     //Toast:
@@ -142,6 +142,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         setup();    //initialize everything
+        assert interval >= 0;
+        assert pathWidth >= 0;
 
         if (interval == 0 && setInterval) {
             //if user sets update interval to 0, warn of battery drain
@@ -190,7 +192,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 if (!on && !paused)
-                    startActivity(new Intent(getApplicationContext(), SelectField.class));    //go to map boundary setting activity
+                    startActivity(new Intent(getApplicationContext(), GetInterval.class));    //go to map boundary setting activity
                 else {
                     if (myToast != null) myToast.cancel();
                     myToast = Toast.makeText(MapsActivity.this, "Must stop process before going to settings", Toast.LENGTH_SHORT);
@@ -216,10 +218,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onPause() {  //remove location updates when paused
         super.onPause();
         //remove updates
-        if(useFusedLocation && myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
+        if(useFusedLocation != null && useFusedLocation.booleanValue() && myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
             myFusedLocationClient.removeLocationUpdates(myLocationCallback);
         }
-        else if(!useFusedLocation && locationListener != null){ //if using GPS only and locationListener is not null
+        else if(useFusedLocation != null && !useFusedLocation.booleanValue() && locationListener != null){ //if using GPS only and locationListener is not null
             locationManager.removeUpdates(locationListener); //stop location updates, also ensures no duplicate update requests
         }
         //else methods needed for location have not been instantiated (are still null) so we don't need to remove location updates (if we try, app will crash)
@@ -231,10 +233,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onStop() {
         super.onStop();
         //remove updates
-        if(useFusedLocation && myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
+        if(useFusedLocation != null && useFusedLocation.booleanValue() && myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
             myFusedLocationClient.removeLocationUpdates(myLocationCallback);
         }
-        else if(!useFusedLocation && locationListener != null){ //if using GPS only and locationListener is not null
+        else if(useFusedLocation != null && !useFusedLocation.booleanValue() && locationListener != null){ //if using GPS only and locationListener is not null
             locationManager.removeUpdates(locationListener); //stop location updates, also ensures no duplicate update requests
         }
         //else methods needed for location have not been instantiated (are still null) so we don't need to remove location updates (if we try, app will crash)
@@ -270,7 +272,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //empty the lists
         timeList.clear();
 
-        if(!useFusedLocation) locationManager = (LocationManager) getSystemService(LOCATION_SERVICE); //set up location manager
+        if(useFusedLocation != null && !useFusedLocation.booleanValue()){
+            locationManager = (LocationManager) getSystemService(LOCATION_SERVICE); //set up location manager
+        }
 
         //define buttons and textview
         startBtn = findViewById(R.id.btnStartStop);
@@ -282,7 +286,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         dataFile = new File(filename);//create file
 
-        if(!useFusedLocation){  // if using GPS, set high accuracy criteria
+        if(useFusedLocation != null && !useFusedLocation.booleanValue()){  // if using GPS, set high accuracy criteria
             setCriteria();
         }
 
@@ -319,10 +323,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationPermissionGranted = false; // ensures that location updates are restarted by forcing locationDetails() to call a getPermissions function
 
         //remove updates (saves battery)
-        if(useFusedLocation && myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
+        if(useFusedLocation != null && useFusedLocation.booleanValue() && myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
             myFusedLocationClient.removeLocationUpdates(myLocationCallback);
         }
-        else if(!useFusedLocation && locationListener != null){ //if using GPS only and locationListener is not null
+        else if(useFusedLocation != null && !useFusedLocation.booleanValue() && locationListener != null){ //if using GPS only and locationListener is not null
             locationManager.removeUpdates(locationListener); //stop location updates, also ensures no duplicate update requests
         } //else methods needed for location have not been instantiated (are still null) so we don't need to remove location updates (if we try, app will crash))
     }
@@ -390,7 +394,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {   //sets up google maps
         gMap = googleMap;   //set gMap to the 'inputted' googleMap
-        if(useSatellite) {
+        if(useSatellite != null && useSatellite.booleanValue()) {
             gMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         }else{
             gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
@@ -410,12 +414,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     != PackageManager.PERMISSION_GRANTED
                     &&
                     ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                            != PackageManager.PERMISSION_GRANTED && useFusedLocation) {
+                            != PackageManager.PERMISSION_GRANTED && useFusedLocation != null && useFusedLocation.booleanValue()) {
                 lastLocation = myFusedLocationClient.getLastLocation().getResult();
             }
             //else if using GPS and permissions given
             else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED && !useFusedLocation) {
+                    != PackageManager.PERMISSION_GRANTED && useFusedLocation != null && !useFusedLocation.booleanValue()) {
                 try {
                     lastLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
                 } catch (Exception e) {
@@ -470,7 +474,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void locationDetails() { //chooses which location function to use based on user's choice on location method
 
         if(on) { //ensures the program is "on"
-            if(useFusedLocation){
+            if(useFusedLocation != null && useFusedLocation.booleanValue()){
                 myFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
                 FusedLocationDetails();
             }

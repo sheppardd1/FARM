@@ -110,7 +110,7 @@ public class SelectField extends FragmentActivity implements OnMapReadyCallback 
     public void onMapReady(GoogleMap googleMap) {
         gMap = googleMap;
         // setup map
-        if(MapsActivity.useSatellite) {
+        if(MapsActivity.useSatellite.booleanValue()) {
             gMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         }else{
             gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);

@@ -4,11 +4,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Map;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,6 +21,7 @@ public class GetInterval extends AppCompatActivity {
     Toast myToast = null;
     boolean GPSRadioIsSet = false;
     boolean MapRadioIsSet = false;
+    boolean drawField = false;
     RadioGroup locationChoiceRadioGroup;
     RadioGroup mapChoiceRadioGroup;
 
@@ -30,6 +35,7 @@ public class GetInterval extends AppCompatActivity {
         final EditText interval_input = findViewById(R.id.interval_input);
         final EditText width_input = findViewById(R.id.width_input);
         Button done = findViewById(R.id.done);
+        Switch drawFieldSw = findViewById(R.id.drawFieldSwitch);
         locationChoiceRadioGroup = findViewById(R.id.LocationChoiceRadioGroup);
         mapChoiceRadioGroup = findViewById(R.id.MapChoiceRadioGroup);
 
@@ -38,46 +44,60 @@ public class GetInterval extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //note: using an unsigned EditText for interval, so don't have to worry about negative numbers there
-                //Ensure interval_input and width_input are not empty and radio button is set
-                if(interval_input.getText().toString().trim().length() > 0
-                        && width_input.getText().toString().trim().length() > 0 && GPSRadioIsSet && MapRadioIsSet) {
 
-                    // set width and interval values
-                    MapsActivity.pathWidth = Float.parseFloat(width_input.getText().toString());   //set path width
+                // If user left some options blank, set them to defaults
+
+                if(interval_input.getText().toString().trim().length() != 0){  //if interval is set, store it
                     MapsActivity.interval = Integer.parseInt(interval_input.getText().toString()); //set interval to value specified in interval_input
                     MapsActivity.interval *= 1000;  //convert seconds into milliseconds
-                    MapsActivity.setInterval = true;    //ensures that this activity only runs once
+                }
+                else if (MapsActivity.interval == -1){  //if never set, give it a default value
+                    MapsActivity.interval = 1000;
+                } //else keep previously set value
 
-                    // watch out for previously set location listeners
-                    if (MapsActivity.locationListener != null) {    //if there is a location listener set up, remove it
-                        MapsActivity.locationManager.removeUpdates(MapsActivity.locationListener);  //ensures we only have one location listener running at once. Don't want duplicate data.
-                    } else if (MapsActivity.useFusedLocation && MapsActivity.myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
-                        MapsActivity.myFusedLocationClient.removeLocationUpdates(MapsActivity.myLocationCallback);
-                    }
 
-                    // All good! Go to mapping activity.
+                if(width_input.getText().toString().trim().length() != 0){ //if width is set, store it
+                    MapsActivity.pathWidth = Float.parseFloat(width_input.getText().toString());
+                }
+                else if (MapsActivity.pathWidth == -1){   //if not set, give it a default value
+                    MapsActivity.pathWidth = 10;
+                } // else keep previously set value
+
+                if (!GPSRadioIsSet && MapsActivity.useFusedLocation == null){   // if GPS radio was never set, default to using Fused Location
+                    MapsActivity.useFusedLocation = true;
+                }// else keep previously set value
+
+                if(!MapRadioIsSet && MapsActivity.useSatellite == null) {    //else Map type radio was never set
+                    MapsActivity.useSatellite = true;
+                }// else keep previously set value
+
+                // All values are now set
+
+                MapsActivity.setInterval = true;    //ensures that this activity only runs once
+
+                // watch out for previously set location listeners
+                if (MapsActivity.locationListener != null) {    //if there is a location listener set up, remove it
+                    MapsActivity.locationManager.removeUpdates(MapsActivity.locationListener);  //ensures we only have one location listener running at once. Don't want duplicate data.
+                } else if (MapsActivity.useFusedLocation != null && MapsActivity.useFusedLocation.booleanValue() && MapsActivity.myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
+                    MapsActivity.myFusedLocationClient.removeLocationUpdates(MapsActivity.myLocationCallback);
+                }
+
+                // All good! Go to next activity
+                if(drawField){
+                    startActivity(new Intent(getApplicationContext(), SelectField.class));
+                }
+                else {
                     startActivity(new Intent(getApplicationContext(), MapsActivity.class));
+                }
+            }
+        });
 
-                }
-                else if(interval_input.getText().toString().trim().length() == 0){  //if interval not set
-                    if(myToast != null) myToast.cancel();
-                    myToast = Toast.makeText(getApplicationContext(), "Must Enter Interval Value", Toast.LENGTH_SHORT);
-                    myToast.show();
-                }
-                else if(width_input.getText().toString().trim().length() == 0){ //if width not set
-                    if(myToast != null) myToast.cancel();
-                    myToast = Toast.makeText(getApplicationContext(), "Must Enter Width Value", Toast.LENGTH_SHORT);
-                    myToast.show();
-                }
-                else if (!GPSRadioIsSet){   // if GPS radio is not set
-                    if(myToast != null) myToast.cancel();
-                    myToast = Toast.makeText(getApplicationContext(), "Must choose location type\n(GPS or Fused)", Toast.LENGTH_SHORT);
-                    myToast.show();
-                }
-                else {    //else Map type radio is not set
-                    if(myToast != null) myToast.cancel();
-                    myToast = Toast.makeText(getApplicationContext(), "Must choose map type\n(regular or satellite)", Toast.LENGTH_SHORT);
-                    myToast.show();
+        drawFieldSw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    drawField = true;
+                } else {
+                    drawField = false;
                 }
             }
         });
