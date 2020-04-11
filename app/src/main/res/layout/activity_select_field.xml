@@ -26,6 +26,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:gravity="center"
+        android:text="@string/drawFieldInstructions"
+        android:textColor="#000000"
         android:textSize="18sp"
         map:layout_constraintBottom_toTopOf="@+id/btnUndo"
         map:layout_constraintEnd_toEndOf="parent"
@@ -37,10 +39,10 @@
         android:id="@+id/btnDone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginBottom="8dp"
         android:text="@string/Done"
         map:layout_constraintBottom_toBottomOf="parent"
-        map:layout_constraintEnd_toStartOf="@+id/TV"
         map:layout_constraintStart_toStartOf="parent"
         tools:layout_conversion_absoluteHeight="65dp"
         tools:layout_conversion_absoluteWidth="360dp" />
@@ -49,11 +51,11 @@
         android:id="@+id/btnUndo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
         android:text="@string/undo"
         map:layout_constraintBottom_toBottomOf="parent"
-        map:layout_constraintEnd_toEndOf="parent"
-        map:layout_constraintStart_toEndOf="@+id/TV" />
+        map:layout_constraintEnd_toEndOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

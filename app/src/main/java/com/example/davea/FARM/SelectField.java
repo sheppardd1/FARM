@@ -14,6 +14,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -91,9 +93,7 @@ public class SelectField extends FragmentActivity implements OnMapReadyCallback 
             }
         });
 
-
-
-        TV.setText("testing");
+        TV.setText(R.string.drawFieldInstructions);
 
     }
 
@@ -119,14 +119,15 @@ public class SelectField extends FragmentActivity implements OnMapReadyCallback 
         gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng point) {
-                markers.add(gMap.addMarker(new MarkerOptions().position(point)));
+                markers.add(gMap.addMarker(new MarkerOptions()
+                        .position(point)
+                ));
                 edges.add(point);
                 drawPolygon();
             }
         });
 
     }
-
 
     public void drawPolygon(){
 

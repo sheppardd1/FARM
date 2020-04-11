@@ -34,7 +34,6 @@
     <string name="drawFieldError">"Must have at least 3 points or none at all!"</string>
     <string name="drawFieldYN">"Would you like to specify field area?"</string>
     <string name="drawFieldToggle">"I want to draw my field"</string>
-
-
+    <string name="drawFieldInstructions">"Tap along the edges of the field"</string>
 
 </resources>
