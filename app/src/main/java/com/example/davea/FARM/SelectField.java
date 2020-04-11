@@ -138,7 +138,7 @@ public class SelectField extends FragmentActivity implements OnMapReadyCallback 
         // if there are enough points to make a polygon, make one
         if(edges != null && edges.size() > 2){
             field = gMap.addPolygon(new PolygonOptions()
-                    .clickable(true)
+                    .clickable(false)
                     .addAll(edges)
             );
             field.setStrokeWidth(POLYGON_STROKE_WIDTH_PX);

@@ -450,7 +450,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void drawField(){
         if(SelectField.edges != null && SelectField.edges.size() > 2) {
             Polygon field = gMap.addPolygon(new PolygonOptions()
-                    .clickable(true)
+                    .clickable(false)
                     .addAll(SelectField.edges)
             );
             field.setStrokeWidth(POLYGON_STROKE_WIDTH_PX);
@@ -489,7 +489,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if(positionList.size()>1) { // draw polyline unless only 1 LatLng point had been taken so far
             LatLng[] corners = getPolygonCorners(positionList.get(positionList.size() - 1), positionList.get(positionList.size() - 2));
             Polygon polygon1 = gMap.addPolygon(new PolygonOptions()
-                    .clickable(true)
+                    .clickable(false)
                     .add(corners[0], corners[1], corners[2], corners[3])
             );
             // TODO: style the polygon
