@@ -435,7 +435,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Location lastLocation = null;
             try {
                 lastLocation = mLocationManager.getLastKnownLocation(provider);
-            }catch (Exception e){}
+            }catch (Exception ignored){}
 
             if (lastLocation == null) {
                 continue;
@@ -620,8 +620,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     myToast = Toast.makeText(MapsActivity.this, "Need GPS permissions for app to function", Toast.LENGTH_SHORT);
                     myToast.show();
                 }
-                //once permission is granted, set up location listener
-                //updating every "interval" milliseconds, regardless of distance change
                 else{
                     locationManager.requestLocationUpdates(interval, 0, locationCriteria, locationListener, null);
                     locationPermissionGranted = true;
