@@ -13,7 +13,7 @@ The Field Augmented Routing Module (FARM) allows users to track their location h
 * Location refresh rate can be chosen.
 ## Screenshots
 Settings            | Drawing Field     | Field Plotted     | Plotting Path     |
-:------------------:|:------------------:------------------:|:------------------:
+:------------------:|:-----------------:|:-----------------:|:------------------:
 <img src="./images/settings.png" width="189" height="393"> | <img src="./images/drawField.png" width="189" height="393"> | <img src="./images/Ready.png" width="189" height="393"> | <img src="./images/Path.png" width="189" height="393">
 ## TODO
 * Track stats such as acreage covered, total acreage of define field.
