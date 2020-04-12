@@ -1,6 +1,8 @@
 # FARM
 The Field Augmented Routing Module (FARM) allows users to track their location history while moving around a field. This helps to ensure that a field is properly and efficiently covered during fertilization, planting, etc.
+
 <img src="./images/logo.png" width="176" height="176">
+
 ## Current functionality
 * Tracks user's path as they move. Path is plotted as a semi-transparent rectangluar polygon. Loction tracking can be paused and restarted.
 * User can define the width of the rectangle in feet so that the width of the sprayer, planter, implement, etc. is represented by the plotted path.
@@ -10,9 +12,9 @@ The Field Augmented Routing Module (FARM) allows users to track their location h
     * Fused Location (uses a combination of GPS, cell tower, and Wi-Fi signals)
 * Location refresh rate can be chosen.
 ## Screenshots
-Settings                   |  Drawing Field
-:-------------------------:|:-------------------------:
-<img src="./images/settings.png" width="286" height="596">   |  <img src="./images/drawField.png" width="286" height="596">
+Settings            | Drawing Field     | Field Plotted     | Plotting Path     |
+:------------------:|:------------------:------------------:|:------------------:
+<img src="./images/settings.png" width="189" height="393"> | <img src="./images/drawField.png" width="189" height="393"> | <img src="./images/Ready.png" width="189" height="393"> | <img src="./images/Path.png" width="189" height="393">
 ## TODO
 * Track stats such as acreage covered, total acreage of define field.
 * Give user ability to save defined field for later use.
