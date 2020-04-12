@@ -1,11 +1,11 @@
 # FARM
 The Field Augmented Routing Module allows users to track their location history while moving around a field. Application is still in development.
 ## Current functionality
-Plots path traveled by the user with rectuangles of a given width in feet. Based on https://github.com/sheppardd1/Mapping_GPS
+Plots path traveled by the user with rectangles of a given width in feet. Based on https://github.com/sheppardd1/Mapping_GPS
 ## TODO
 * Track stats such as acreage covered, total acreage of define field.
 * Give user ability to save defined field.
-* Automatiacally zoom map at initialization before defining field.
+* Track time spent working.
 ## Dependencies
 * The app is dependent on the android-maps-utils library
 * Link to documentation: 

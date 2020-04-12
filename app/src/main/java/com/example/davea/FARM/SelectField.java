@@ -206,11 +206,6 @@ public class SelectField extends FragmentActivity implements OnMapReadyCallback 
         else if (edges != null && edges.size() < 3){
             TV.setText(R.string.drawFieldInstructions);
         }
-
-
     }
-
-
-
 
 }
