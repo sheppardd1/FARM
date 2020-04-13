@@ -16,10 +16,9 @@ Settings            | Drawing Field     | Field Plotted     | Plotting Path     
 :------------------:|:-----------------:|:-----------------:|:------------------:
 <img src="./images/settings.png" width="189" height="393"> | <img src="./images/drawField.png" width="189" height="393"> | <img src="./images/Ready.png" width="189" height="393"> | <img src="./images/Path.png" width="189" height="393">
 ## TODO
-* Track stats such as acreage covered, total acreage of define field.
+* Track stats such as acreage covered and time elapsed.
 * Give user ability to save defined field for later use.
 * Give user to save progress so they can resume later.
-* Track time spent working.
 ## Dependencies
 * The app is dependent on the android-maps-utils library
 * Link to documentation: 
