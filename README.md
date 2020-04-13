@@ -1,5 +1,5 @@
 # FARM
-The Field Augmented Routing Module (FARM) allows users to track their location history while moving around a field. This helps to ensure that a field is properly and efficiently covered during fertilization, planting, etc.
+The Field Automated Routing Module (FARM) allows users to track their location history while moving around a field. This helps to ensure that a field is properly and efficiently covered during fertilization, planting, etc.
 
 <img src="./images/logo.png" width="176" height="176">
 
