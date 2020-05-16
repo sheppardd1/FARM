@@ -17,7 +17,7 @@ Settings            | Drawing Field     | Field Plotted     | Plotting Path     
 <img src="./images/settings.png" width="189" height="393"> | <img src="./images/drawField.png" width="189" height="393"> | <img src="./images/Ready.png" width="189" height="393"> | <img src="./images/Path.png" width="189" height="393">
 
 ## Downloading
-To download a runnable version of the FARM app, click the "release" tab near the top of this page, and download the latest "FARM.apk" file. Once this file is downloaded on your Android device, you can tap the file and the app will install on your device. This app is offered as-is with no guarantees about its functionality whatsoever. Use it at your own risk.
+To download a runnable version of the FARM app, click the ["release"](https://github.com/sheppardd1/FARM/releases) tab near the top of this page, and download the latest "FARM.apk" file Once this file is downloaded on your Android device, you can tap the file and the app will install on your device. This app is offered as-is with no guarantees about its functionality whatsoever. Use it at your own risk.
 ## TODO
 * Track stats such as acreage covered and time elapsed.
 * Give user ability to save defined field for later use.
