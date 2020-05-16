@@ -9,17 +9,12 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Switch;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import java.util.Map;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class GetInterval extends AppCompatActivity {
 
-    Toast myToast = null;
     boolean GPSRadioIsSet = false;
     boolean MapRadioIsSet = false;
     boolean drawField = false;
@@ -34,6 +29,7 @@ public class GetInterval extends AppCompatActivity {
         //setup UI
         final EditText interval_input = findViewById(R.id.interval_input);
         final EditText width_input = findViewById(R.id.width_input);
+        final EditText offset_input = findViewById(R.id.offset_input);
         Button done = findViewById(R.id.done);
         CheckBox drawFieldCheckBox = findViewById(R.id.drawFieldCheckBox);
         locationChoiceRadioGroup = findViewById(R.id.LocationChoiceRadioGroup);
@@ -55,13 +51,17 @@ public class GetInterval extends AppCompatActivity {
                     MapsActivity.interval = 1000;
                 } //else keep previously set value
 
-
                 if(width_input.getText().toString().trim().length() != 0){ //if width is set, store it
                     MapsActivity.pathWidth = Float.parseFloat(width_input.getText().toString());
                 }
                 else if (MapsActivity.pathWidth == -1){   //if not set, give it a default value
                     MapsActivity.pathWidth = 10;
                 } // else keep previously set value
+
+                if(offset_input.getText().toString().trim().length() != 0){  //if offset is set, store it
+                    //set offset to value specified in offset_input, but invert the sign first
+                    MapsActivity.offset = -1 * Integer.parseInt(offset_input.getText().toString());
+                }
 
                 if (!GPSRadioIsSet && MapsActivity.useFusedLocation == null){   // if GPS radio was never set, default to using Fused Location
                     MapsActivity.useFusedLocation = true;
@@ -78,7 +78,7 @@ public class GetInterval extends AppCompatActivity {
                 // watch out for previously set location listeners
                 if (MapsActivity.locationListener != null) {    //if there is a location listener set up, remove it
                     MapsActivity.locationManager.removeUpdates(MapsActivity.locationListener);  //ensures we only have one location listener running at once. Don't want duplicate data.
-                } else if (MapsActivity.useFusedLocation != null && MapsActivity.useFusedLocation.booleanValue() && MapsActivity.myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
+                } else if (MapsActivity.useFusedLocation != null && MapsActivity.useFusedLocation && MapsActivity.myLocationCallback != null){ //if using fused location and myLocaationCallback is not null
                     MapsActivity.myFusedLocationClient.removeLocationUpdates(MapsActivity.myLocationCallback);
                 }
 

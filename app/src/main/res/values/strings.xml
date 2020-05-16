@@ -35,5 +35,9 @@
     <string name="drawFieldYN">"Would you like to specify field area?"</string>
     <string name="drawFieldToggle">"I want to draw my field"</string>
     <string name="drawFieldInstructions">"Tap along the edges of the field"</string>
+    <string name="OffsetInstructions">"Specify Offset in Feet\n(positive to offset right, negative to offset left)"</string>
+    <string name="Offset">"Offset:"</string>
+
+
 
 </resources>

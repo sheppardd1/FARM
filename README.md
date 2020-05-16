@@ -25,3 +25,5 @@ Settings            | Drawing Field     | Field Plotted     | Plotting Path     
     * https://developers.google.com/maps/documentation/android-sdk/utility/setup
     * https://github.com/googlemaps/android-maps-utils
 * To import this library, use the 3rd set of instructions given at https://o7planning.org/en/10525/how-to-add-external-libraries-to-android-project-in-android-studio
+## Changelog
+* 16MAY2020 [version 1.01]: Added ability for user to offset the recieved GPS values. This can be used when the phone is being held on the side of the tractor instead of the center.

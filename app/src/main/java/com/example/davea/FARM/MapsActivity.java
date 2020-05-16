@@ -60,8 +60,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //Constants:
     static final String filename = "GPS_data.txt";  //name of file where data is saved
-    static final int EARTH_RADIUS_FT = 20924640;    // approx radius of Earth in feet
     final int POLYGON_PADDING_PREFERENCE = 10;      // padding around user-defined field that map zooms to
+    final double METERS_PER_FEET = 0.3048;           // for converting from ft to m
 
     //Location:
     //For GPS only:
@@ -90,6 +90,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     static int interval = -1;    //refresh rate of GPS
     //float:
     public static float pathWidth = -1; // width of tractor in feet
+    public static float offset = 0;     // offset of location data
+    // use positive value to offset the app's path to the right and negative to offset to the left
+
     //String:
     static String fileContents; //Stuff that will be written to the file. It is static so that it can be accessed in other activity
     String time;    //the time in the dateFormatDayAndTime format (defined later). Used for giving start and end times of each session
@@ -519,15 +522,68 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         double theta = computeHeading(startLatLng, endLatLng);
         double phi = 90-theta;
 
-        double distance = (pathWidth/2) * 0.3048;   // distance from location point to edge of polygon
-        corners[0] = computeOffsetOrigin(startLatLng, distance, 360-phi);
-        corners[1] = computeOffsetOrigin(startLatLng, distance, 180-phi);
-        corners[2] = computeOffsetOrigin(endLatLng, distance, 180-phi);
-        corners[3] = computeOffsetOrigin(endLatLng, distance, 360-phi);
+        double distance = (pathWidth/2) * METERS_PER_FEET;   // distance from location point to edge of polygon
+        // define the corners (see the comment block at the bottom of function for reference)
+        corners[0] = computeOffsetOrigin(startLatLng, distance, 360-phi);   // point D
+        corners[1] = computeOffsetOrigin(startLatLng, distance, 180-phi);   // point C
+        corners[2] = computeOffsetOrigin(endLatLng, distance, 180-phi);     // point B
+        corners[3] = computeOffsetOrigin(endLatLng, distance, 360-phi);     // point A
 
         return corners;
+
+        /*
+        Use this rectangle (ABCD) as reference for the code above
+
+                   A      end
+                          /
+                        /        B
+                      /
+           D        /
+                  /
+              start     C
+
+         */
+
     }
 
+
+    public void createOffset(){
+        /* Purpose: offsets the last value that was added to postionList by "offset" amount in ft
+            If only 2 items in list, then must offset both. If only 1 item, need to wait - do nothing.
+         */
+
+        // if we only have one loation, can't get bearing to compute offset angle, so do nothing
+        if(positionList.size() == 1) return;
+
+        // compute offset in meters (TODO: should probably make this a one-time event)
+        double offsetMeters = offset * METERS_PER_FEET;
+
+        // get current location and previous locations
+        LatLng start = positionList.get(positionList.size() - 2);
+        LatLng end = positionList.get(positionList.size() - 1);
+
+        if(positionList.size() == 2){   // if we just got first two points, need to offset both
+            double phi = 90-computeHeading(start, end);
+            // offset start and end values
+            start = computeOffsetOrigin(start, offsetMeters, 180-phi);
+            end = computeOffsetOrigin(end, offsetMeters, 180-phi);
+            // replace LatLng values in the list with the offset ones
+            positionList.set(positionList.size() - 2, start);
+            positionList.set(positionList.size() - 1, end);
+
+        }else if(positionList.size() > 2){
+            LatLng oldStart = positionList.get(positionList.size() - 3);    // get value from 3 locations ago
+            double oldPhi = 90-computeHeading(oldStart, start);             // get old phi
+            // un-offset the start value so that we can get the proper bearing between last and current location
+            LatLng originalStart = computeOffsetOrigin(start, offsetMeters, 360-oldPhi);
+            // get current value of phi using un-offsetted "start" and pre-offset "end"
+            double phi = 90-computeHeading(originalStart, end);
+            end = computeOffsetOrigin(end, offsetMeters, 180-phi);  // offset "end"
+            positionList.set(positionList.size() - 1, end); // add offsetted "end" to list
+
+        }
+
+    }
 /********************************************************************
  *Functions for when using GPS only:
  ********************************************************************/
@@ -571,6 +627,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     //set lat and long into LatLng type variable
                     positionList.add(new LatLng(currentLatitude, currentLongitude));
+                    if (offset != 1) createOffset();    //account for offset
 
                     //display values on screen
                     TV.setText(R.string.running);
@@ -755,7 +812,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     //set lat and long into LatLng type variable
                     positionList.add(new LatLng(currentLatitude, currentLongitude));
-
+                    if (offset != 1) createOffset();    //account for offset
 
                     //display values on screen
                     TV.setText(R.string.running);
