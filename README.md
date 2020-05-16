@@ -4,7 +4,7 @@ The Field Automated Routing Module (FARM) allows users to track their location h
 <img src="./images/logo.png" width="176" height="176">
 
 ## Current functionality
-* Tracks user's path as they move. Path is plotted as a semi-transparent rectangluar polygon. Loction tracking can be paused and restarted.
+* Tracks user's path as they move. Path is plotted as a semi-transparent rectangluar polygon with a right/left offset as defined by the user. (An offset allows for the user to account for scenarios where the phone/tablet is not placed in the center of the tractor, but on the left or right side of the tractor). Location tracking can be paused and restarted.
 * User can define the width of the rectangle in feet so that the width of the sprayer, planter, implement, etc. is represented by the plotted path.
 * User can define the boundaries of their field by tapping locations along the perimeter of their field on the map (optional). This area is then highlighted on the main map.
 * Location method can be chosen as:
@@ -19,6 +19,7 @@ Settings            | Drawing Field     | Field Plotted     | Plotting Path     
 * Track stats such as acreage covered and time elapsed.
 * Give user ability to save defined field for later use.
 * Give user to save progress so they can resume later.
+* Allow user to choose colors of field area and path.
 ## Dependencies
 * The app is dependent on the android-maps-utils library
 * Link to documentation: 
